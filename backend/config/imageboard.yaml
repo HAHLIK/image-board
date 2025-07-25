@@ -1,0 +1,2 @@
+env: "local"
+imageboard_port: 8030

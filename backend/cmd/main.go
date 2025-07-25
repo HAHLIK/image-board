@@ -7,17 +7,21 @@ import (
 	"syscall"
 
 	"github.com/HAHLIK/image-board/internal/app"
+	"github.com/HAHLIK/image-board/internal/config"
 	"github.com/HAHLIK/image-board/internal/pkg/logger"
 )
 
 const (
-	PORT = 8030
+	ENV_PATH             = "../.env"
+	ENV_NAME_CONFIG_PATH = "CONFIG_PATH"
 )
 
 func main() {
-	log := logger.SetupLoger(logger.EnvLocal)
+	config := config.MustLoad(ENV_PATH, ENV_NAME_CONFIG_PATH)
 
-	application := app.New(log, PORT)
+	log := logger.SetupLoger(config.Env)
+
+	application := app.New(log, config.ImageboardPort)
 
 	go application.ImageboardApp.MustRun()
 
