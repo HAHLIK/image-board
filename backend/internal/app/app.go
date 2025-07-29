@@ -10,9 +10,16 @@ type App struct {
 	ImageboardApp *imageboard.App
 }
 
-func New(log *slog.Logger, imageboardPort int) *App {
+func New(
+	postsController imageboard.Controller,
+	log *slog.Logger,
+	imageboardPort int,
+) *App {
 	app := &App{
-		ImageboardApp: imageboard.New(log, imageboardPort),
+		ImageboardApp: imageboard.New(
+			postsController,
+			log,
+			imageboardPort),
 	}
 
 	return app

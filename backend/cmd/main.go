@@ -8,7 +8,9 @@ import (
 
 	"github.com/HAHLIK/image-board/internal/app"
 	"github.com/HAHLIK/image-board/internal/config"
+	postsController "github.com/HAHLIK/image-board/internal/controller/posts"
 	"github.com/HAHLIK/image-board/internal/pkg/logger"
+	postsService "github.com/HAHLIK/image-board/internal/service/posts"
 )
 
 const (
@@ -21,7 +23,14 @@ func main() {
 
 	log := logger.SetupLoger(config.Env)
 
-	application := app.New(log, config.ImageboardPort)
+	postsService := postsService.New()
+	postsController := postsController.New(postsService, log)
+
+	application := app.New(
+		postsController,
+		log,
+		config.ImageboardPort,
+	)
 
 	go application.ImageboardApp.MustRun()
 

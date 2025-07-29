@@ -4,26 +4,24 @@ import (
 	"log/slog"
 	"strconv"
 
-	"github.com/HAHLIK/image-board/internal/endpoints"
 	"github.com/HAHLIK/image-board/internal/pkg/errwrapper"
-	"github.com/gin-gonic/gin"
 )
 
-type App struct {
-	log    *slog.Logger
-	router *gin.Engine
-	port   int
+type Controller interface {
+	Run(addr string) error
 }
 
-func New(log *slog.Logger, port int) *App {
-	router := gin.New()
+type App struct {
+	postsController Controller
+	log             *slog.Logger
+	port            int
+}
 
-	router.GET("/", endpoints.Dummy)
-
+func New(postsController Controller, log *slog.Logger, port int) *App {
 	return &App{
-		log:    log,
-		router: router,
-		port:   port,
+		postsController: postsController,
+		log:             log,
+		port:            port,
 	}
 }
 
@@ -45,7 +43,7 @@ func (a *App) run() error {
 
 	addr := ":" + strconv.Itoa(a.port)
 
-	if err := a.router.Run(addr); err != nil {
+	if err := a.postsController.Run(addr); err != nil {
 		return errwrapper.Wrap(op, err)
 	}
 
