@@ -1,2 +1,3 @@
 env: "local"
 imageboard_port: 8030
+main_storage_url: "db-postgres:5432"
