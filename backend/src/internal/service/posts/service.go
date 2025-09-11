@@ -1,6 +1,7 @@
 package postsService
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 
@@ -10,35 +11,35 @@ import (
 )
 
 type Service struct {
-	cacheStorage Storage
-	mainStorage  Storage
-	log          *slog.Logger
+	cacheProvider Provider
+	provider      Provider
+	log           *slog.Logger
 }
 
-type Storage interface {
-	GetPosts() (models.Posts, error)
+type Provider interface {
+	GetPostsBatch(ctx context.Context, offset int64, limit int) (models.Posts, error)
 }
 
 func New(
-	cacheStorage Storage,
-	mainStorage Storage,
+	cacheProvider Provider,
+	provider Provider,
 	log *slog.Logger,
 ) *Service {
 	return &Service{
-		cacheStorage: cacheStorage,
-		mainStorage:  mainStorage,
-		log:          log,
+		cacheProvider: cacheProvider,
+		provider:      provider,
+		log:           log,
 	}
 }
 
-func (s *Service) GetPosts() (models.Posts, error) {
+func (s *Service) GetPostsBatch(ctx context.Context, offset int64, limit int) (models.Posts, error) {
 	const op = "postsService.GetPosts"
 
 	log := s.log.With("op", op)
 
 	log.Info("Attepmting get posts from cache")
 
-	posts, err := s.cacheStorage.GetPosts()
+	posts, err := s.cacheProvider.GetPostsBatch(ctx, offset, limit)
 	if err == nil {
 		return posts, nil
 	}
@@ -47,9 +48,9 @@ func (s *Service) GetPosts() (models.Posts, error) {
 		log.Error("Failed to get posts from cache")
 		return models.Posts{}, errwrapper.Wrap(op, err)
 	}
-	log.Info("Posts not found in cache, trying main storage")
+	log.Info("Posts not found in cache, trying main provider")
 
-	posts, err = s.mainStorage.GetPosts()
+	posts, err = s.provider.GetPostsBatch(ctx, offset, limit)
 	if err != nil {
 		if errors.Is(err, storage.ErrPostsNotFound) {
 			log.Info("Posts not found")

@@ -5,6 +5,6 @@ type Posts struct {
 }
 
 type Post struct {
-	Title string `json:"title"`
-	Text  string `json:"text"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
 }

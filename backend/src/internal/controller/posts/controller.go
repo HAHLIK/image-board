@@ -1,6 +1,7 @@
 package postsController
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 )
 
 type PostsService interface {
-	GetPosts() (models.Posts, error)
+	GetPostsBatch(ctx context.Context, offset int64, limit int) (models.Posts, error)
 }
 
 type Controller struct {
@@ -46,14 +47,27 @@ func (c *Controller) Posts(ctx *gin.Context) {
 
 	log.Info("request")
 
-	responceCode := http.StatusOK
+	offset := ctx.GetInt64("offset")
+	limit := ctx.GetInt("limit")
 
-	posts, err := c.PostsService.GetPosts()
-	if err != nil {
-		responceCode = http.StatusInternalServerError
-		log.Error("can't get posts")
+	if offset <= 0 {
+		log.Info("offset <= 0")
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "offset must be positive"})
+		return
+	}
+	if limit <= 0 {
+		log.Info("limit <= 0")
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "limit must be positive"})
+		return
 	}
 
-	log.Info(fmt.Sprintf("responce code: %v", responceCode))
+	posts, err := c.PostsService.GetPostsBatch(ctx.Request.Context(), offset, limit)
+	if err != nil {
+		log.Error("can't get posts")
+		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "can't get posts"})
+		return
+	}
+
+	log.Info(fmt.Sprintf("response code: %v", http.StatusOK))
 	ctx.IndentedJSON(http.StatusOK, posts)
 }
