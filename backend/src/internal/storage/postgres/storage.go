@@ -33,18 +33,36 @@ func (s *Storage) Stop(ctx context.Context) {
 	}
 }
 
-func (s *Storage) GetPostsBatch(ctx context.Context, offset int64, limit int) (models.Posts, error) {
+func (s *Storage) GetPostsBatch(ctx context.Context, offset int64, limit int64) (models.Posts, error) {
 	const op = "postgres.GetPostsBatch"
 
-	var batch models.Posts
-	if err := s.db.QueryRow(ctx, QueryGetPosts, offset, limit).Scan(&batch); err != nil {
+	batch := models.Posts{Posts: make([]*models.Post, 0)}
+
+	rows, err := s.db.Query(ctx, QueryGetPosts, offset, limit)
+	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return models.Posts{}, errwrapper.Wrap(op, storage.ErrPostsNotFound)
 		}
 		return models.Posts{}, errwrapper.Wrap(op, err)
 	}
 
+	for rows.Next() {
+		var post models.Post
+		if err := rows.Scan(&post.Id, &post.Title, &post.Content); err != nil {
+			return models.Posts{}, errwrapper.Wrap(op, err)
+		}
+		batch.Posts = append(batch.Posts, &post)
+	}
 	return batch, nil
+}
+
+func (s *Storage) Init(ctx context.Context) error {
+	const op = "postgres.Init"
+
+	if _, err := s.db.Exec(ctx, QueryInit); err != nil {
+		return errwrapper.Wrap(op, storage.ErrCantExecInit)
+	}
+	return nil
 }
 
 func (s *Storage) connect(ctx context.Context, url string, user string, password string) error {

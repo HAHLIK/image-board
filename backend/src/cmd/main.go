@@ -38,6 +38,10 @@ func main() {
 
 	defer storage.Stop(ctx)
 
+	if err := storage.Init(ctx); err != nil {
+		log.Warn(err.Error())
+	}
+
 	postsService := postsService.New(storage, storage, log)
 	postsController := postsController.New(postsService, log)
 

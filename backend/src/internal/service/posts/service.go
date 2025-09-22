@@ -8,6 +8,7 @@ import (
 	"github.com/HAHLIK/image-board/internal/models"
 	"github.com/HAHLIK/image-board/internal/storage"
 	"github.com/HAHLIK/image-board/pkg/errwrapper"
+	"github.com/HAHLIK/image-board/pkg/logger"
 )
 
 type Service struct {
@@ -17,7 +18,7 @@ type Service struct {
 }
 
 type Provider interface {
-	GetPostsBatch(ctx context.Context, offset int64, limit int) (models.Posts, error)
+	GetPostsBatch(ctx context.Context, offset int64, limit int64) (models.Posts, error)
 }
 
 func New(
@@ -32,7 +33,7 @@ func New(
 	}
 }
 
-func (s *Service) GetPostsBatch(ctx context.Context, offset int64, limit int) (models.Posts, error) {
+func (s *Service) GetPostsBatch(ctx context.Context, offset int64, limit int64) (models.Posts, error) {
 	const op = "postsService.GetPosts"
 
 	log := s.log.With("op", op)
@@ -45,7 +46,7 @@ func (s *Service) GetPostsBatch(ctx context.Context, offset int64, limit int) (m
 	}
 
 	if !errors.Is(err, storage.ErrPostsNotFound) {
-		log.Error("Failed to get posts from cache")
+		log.Error("Failed to get posts from cache", logger.Err(err))
 		return models.Posts{}, errwrapper.Wrap(op, err)
 	}
 	log.Info("Posts not found in cache, trying main provider")

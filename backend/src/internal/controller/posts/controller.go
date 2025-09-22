@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/HAHLIK/image-board/internal/models"
 	"github.com/HAHLIK/image-board/pkg/errwrapper"
@@ -12,7 +13,7 @@ import (
 )
 
 type PostsService interface {
-	GetPostsBatch(ctx context.Context, offset int64, limit int) (models.Posts, error)
+	GetPostsBatch(ctx context.Context, offset int64, limit int64) (models.Posts, error)
 }
 
 type Controller struct {
@@ -47,21 +48,24 @@ func (c *Controller) Posts(ctx *gin.Context) {
 
 	log.Info("request")
 
-	offset := ctx.GetInt64("offset")
-	limit := ctx.GetInt("limit")
+	offset, _ := strconv.Atoi(ctx.Query("offset"))
+	limit, _ := strconv.Atoi(ctx.Query("limit"))
 
-	if offset <= 0 {
-		log.Info("offset <= 0")
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "offset must be positive"})
+	if offset < 0 {
+		log.Info("offset < 0")
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "offset must be positive or zero"})
 		return
 	}
 	if limit <= 0 {
-		log.Info("limit <= 0")
+		log.Info("limit <= 0", slog.Attr{
+			Key:   "limit",
+			Value: slog.AnyValue(limit),
+		})
 		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "limit must be positive"})
 		return
 	}
 
-	posts, err := c.PostsService.GetPostsBatch(ctx.Request.Context(), offset, limit)
+	posts, err := c.PostsService.GetPostsBatch(ctx.Request.Context(), int64(offset), int64(limit))
 	if err != nil {
 		log.Error("can't get posts")
 		ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "can't get posts"})
