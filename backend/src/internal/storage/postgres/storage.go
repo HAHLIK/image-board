@@ -56,6 +56,17 @@ func (s *Storage) GetPostsBatch(ctx context.Context, offset int64, limit int64) 
 	return batch, nil
 }
 
+func (s *Storage) SavePost(ctx context.Context, post *models.Post) (int64, error) {
+	const op = "postgres.SavePost"
+
+	var id int64
+
+	if err := s.db.QueryRow(ctx, QuerySavePost, post.Title, post.Content).Scan(&id); err != nil {
+		return 0, errwrapper.Wrap(op, err)
+	}
+	return id, nil
+}
+
 func (s *Storage) Init(ctx context.Context) error {
 	const op = "postgres.Init"
 

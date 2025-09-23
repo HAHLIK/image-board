@@ -19,6 +19,7 @@ type Service struct {
 
 type Provider interface {
 	GetPostsBatch(ctx context.Context, offset int64, limit int64) (models.Posts, error)
+	SavePost(ctx context.Context, post *models.Post) (int64, error)
 }
 
 func New(
@@ -62,5 +63,23 @@ func (s *Service) GetPostsBatch(ctx context.Context, offset int64, limit int64) 
 		return models.Posts{}, errwrapper.Wrap(op, err)
 	}
 
+	log.Info("Succesfuly getting posts batch")
 	return posts, nil
+}
+
+func (s *Service) SavePost(ctx context.Context, post *models.Post) (int64, error) {
+	const op = "postsService.SavePost"
+
+	log := s.log.With("op", op)
+
+	log.Info("Attepmting save post")
+
+	id, err := s.provider.SavePost(ctx, post)
+	if err != nil {
+		log.Error("Failed save post", logger.Err(err))
+		return 0, errwrapper.Wrap(op, err)
+	}
+
+	log.Info("Succesfuly save post")
+	return id, nil
 }
