@@ -2,8 +2,8 @@ package postgres
 
 const (
 	QuerySavePost = `
-	INSERT INTO posts (title, content)
-	VALUES ($1, $2)
+	INSERT INTO posts (title, content, time_stamp)
+	VALUES ($1, $2, NOW())
 	RETURNING id;
 	`
 
@@ -17,7 +17,8 @@ const (
 	CREATE TABLE IF NOT EXISTS posts (
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
-	content TEXT NOT NULL
+    content TEXT NOT NULL,
+    time_stamp TIMESTAMP
 );
 	`
 )

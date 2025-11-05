@@ -48,7 +48,7 @@ func (s *Storage) GetPostsBatch(ctx context.Context, offset int64, limit int64) 
 
 	for rows.Next() {
 		var post models.Post
-		if err := rows.Scan(&post.Id, &post.Title, &post.Content); err != nil {
+		if err := rows.Scan(&post.Id, &post.Title, &post.Content, &post.TimeStamp); err != nil {
 			return models.Posts{}, errwrapper.Wrap(op, err)
 		}
 		batch.Posts = append(batch.Posts, &post)

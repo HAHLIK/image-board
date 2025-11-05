@@ -1,0 +1,21 @@
+#root {
+  margin: 0 auto;
+}
+
+.menu {
+  justify-content: center;
+  background-color: #282e33;
+  border: 1px solid;
+  border-color: #1b1f20;
+  box-shadow: 0 0 5px rgba(14, 13, 13, 0.418);
+}
+
+.menu p {
+  font-size: 25px;
+  font-weight: 700;
+  color: rgb(216, 216, 216);
+}
+
+.contentBlock {
+  margin-right: 30px;
+}
