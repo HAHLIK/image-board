@@ -12,3 +12,9 @@ type Post struct {
 	Content   string    `json:"content"`
 	TimeStamp time.Time `json:"timestamp"`
 }
+
+type User struct {
+	Id       []byte
+	Name     string
+	PassHash []byte
+}

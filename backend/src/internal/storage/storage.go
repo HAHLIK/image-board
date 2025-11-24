@@ -1,8 +1,9 @@
 package storage
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
-	ErrPostsNotFound = errors.New("posts not found")
-	ErrCantExecInit  = errors.New("can't exec init")
+	ErrIsNotExist = errors.New("is not exist")
 )

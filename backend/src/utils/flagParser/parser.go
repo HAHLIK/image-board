@@ -1,4 +1,4 @@
-package flagparser
+package parser
 
 import (
 	"errors"

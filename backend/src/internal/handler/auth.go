@@ -1,0 +1,66 @@
+package handler
+
+import (
+	"errors"
+	"net/http"
+
+	"github.com/HAHLIK/image-board/internal/service"
+	"github.com/HAHLIK/image-board/utils"
+	"github.com/gin-gonic/gin"
+)
+
+func (h *Handler) signUp(ctx *gin.Context) {
+	const op = "handler.register"
+	log := h.log.With("op", op)
+
+	var request UserInput
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return
+	}
+
+	if (len(request.Name) <= 5) || (len(request.Password) <= 8) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "username lenght <= 5 or password lenght <= 8"})
+		return
+	}
+
+	id, err := h.authService.SignUp(ctx, request.Name, request.Password)
+	if err != nil {
+		if errors.Is(err, service.ErrUserIsExist) {
+			ctx.JSON(http.StatusConflict, gin.H{"error": "user is exist"})
+			return
+		}
+		log.Error("failed register user", utils.SlogErr(err))
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed register user"})
+		return
+	}
+	ctx.JSON(http.StatusCreated, id)
+}
+
+func (h *Handler) signIn(ctx *gin.Context) {
+	const op = "handler.login"
+	log := h.log.With("op", op)
+
+	var request UserInput
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return
+	}
+
+	if (len(request.Name) <= 5) || (len(request.Password) <= 8) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "username lenght <= 5 or password lenght <= 8"})
+		return
+	}
+
+	token, err := h.authService.SignIn(ctx, request.Name, request.Password)
+	if err != nil {
+		if errors.Is(err, service.ErrInvalidCredentails) {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentails"})
+			return
+		}
+		log.Error("failed login user")
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed login user"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"token": token})
+}

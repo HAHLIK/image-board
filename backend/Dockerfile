@@ -26,7 +26,7 @@ COPY --from=builder /usr/local/src/bin/app /
 
 COPY --from=builder /usr/local/src/main.yaml /
 
-ARG CONFIG_PATH POSTGRES_USER POSTGRES_PASSWORD
+ARG POSTGRES_USER
 
 RUN adduser -D ${POSTGRES_USER}
 USER ${POSTGRES_USER}

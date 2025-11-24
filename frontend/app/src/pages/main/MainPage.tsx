@@ -10,11 +10,10 @@ function MainPage() {
   const setPosts = usePostsStore(state => state.setPosts);
 
   useEffect(() => {
-    getPosts("http://localhost/posts/?offset=0&limit=10", setPosts)
+    getPosts("http://localhost/api/posts?offset=0&limit=10", setPosts)
   }, [setPosts]);
 
   const posts = usePostsStore(state => state.posts)
-  console.log(posts)
 
   return (
     <>
