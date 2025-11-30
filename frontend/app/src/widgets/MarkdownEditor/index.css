@@ -1,0 +1,48 @@
+.markdownEditorContainer {
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  background: var(--bg-elevated);
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+.markdownEditorContainer:hover {
+  border-color: var(--primary-color);
+}
+
+.markdownEditorContainer .w-md-editor {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.markdownEditorContainer .w-md-editor-toolbar {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.markdownEditorContainer .w-md-editor-toolbar button::before {
+  content: none !important;
+}
+
+.markdownEditorContainer .w-md-editor-text-input {
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.w-md-editor .w-md-editor-text-pre .title1,
+.w-md-editor .w-md-editor-text-pre .title2 {
+    font-weight: inherit !important;
+    font-size: inherit !important;
+    color: inherit !important;
+}
+
+
+.markdownEditorContainer .w-md-editor-text-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.wmde-markdown-color {
+    background: var(--bg-elevated);
+}

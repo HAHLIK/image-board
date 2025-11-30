@@ -7,10 +7,11 @@ type Posts struct {
 }
 
 type Post struct {
-	Id        int64     `json:"id"`
-	Title     string    `json:"title"`
-	Content   string    `json:"content"`
-	TimeStamp time.Time `json:"timestamp"`
+	Id         int64     `json:"id"`
+	Title      string    `json:"title"`
+	Content    string    `json:"content"`
+	AuthorName string    `json:"author_name"`
+	TimeStamp  time.Time `json:"timestamp"`
 }
 
 type User struct {

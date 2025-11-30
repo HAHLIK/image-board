@@ -24,7 +24,7 @@ func (p *PostgresStorage) GetPostsBatch(ctx context.Context, offset int64, limit
 
 	for rows.Next() {
 		var post models.Post
-		if err := rows.Scan(&post.Id, &post.Title, &post.Content, &post.TimeStamp); err != nil {
+		if err := rows.Scan(&post.Id, &post.Title, &post.Content, &post.AuthorName, &post.TimeStamp); err != nil {
 			return models.Posts{}, utils.ErrWrap(op, err)
 		}
 		batch.Posts = append(batch.Posts, &post)
@@ -37,7 +37,7 @@ func (p *PostgresStorage) SavePost(ctx context.Context, post *models.Post) (int6
 
 	var id int64
 
-	if err := p.db.QueryRow(ctx, QuerySavePost, post.Title, post.Content).Scan(&id); err != nil {
+	if err := p.db.QueryRow(ctx, QuerySavePost, post.Title, post.Content, post.AuthorName).Scan(&id); err != nil {
 		return 0, utils.ErrWrap(op, err)
 	}
 	return id, nil
@@ -45,8 +45,8 @@ func (p *PostgresStorage) SavePost(ctx context.Context, post *models.Post) (int6
 
 const (
 	QuerySavePost = `
-	INSERT INTO posts (title, content, time_stamp)
-	VALUES ($1, $2, NOW())
+	INSERT INTO posts (title, content, author_name, time_stamp)
+	VALUES ($1, $2, $3, NOW())
 	RETURNING id;
 	`
 

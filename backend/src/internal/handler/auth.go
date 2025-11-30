@@ -10,56 +10,56 @@ import (
 )
 
 func (h *Handler) signUp(ctx *gin.Context) {
-	const op = "handler.register"
+	const op = "handler.signUp"
 	log := h.log.With("op", op)
 
 	var request UserInput
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
 		return
 	}
 
-	if (len(request.Name) <= 5) || (len(request.Password) <= 8) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "username lenght <= 5 or password lenght <= 8"})
+	if (len(request.Name) < 3) || (len(request.Password) < 8) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "username lenght < 3 or password lenght < 8"})
 		return
 	}
 
 	id, err := h.authService.SignUp(ctx, request.Name, request.Password)
 	if err != nil {
 		if errors.Is(err, service.ErrUserIsExist) {
-			ctx.JSON(http.StatusConflict, gin.H{"error": "user is exist"})
+			ctx.JSON(http.StatusConflict, gin.H{"message": "user is exist"})
 			return
 		}
 		log.Error("failed register user", utils.SlogErr(err))
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed register user"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "failed register user"})
 		return
 	}
 	ctx.JSON(http.StatusCreated, id)
 }
 
 func (h *Handler) signIn(ctx *gin.Context) {
-	const op = "handler.login"
+	const op = "handler.signIn"
 	log := h.log.With("op", op)
 
 	var request UserInput
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "invalid request"})
 		return
 	}
 
-	if (len(request.Name) <= 5) || (len(request.Password) <= 8) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "username lenght <= 5 or password lenght <= 8"})
+	if (len(request.Name) < 3) || (len(request.Password) < 8) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"message": "username lenght < 3 or password lenght < 8"})
 		return
 	}
 
 	token, err := h.authService.SignIn(ctx, request.Name, request.Password)
 	if err != nil {
 		if errors.Is(err, service.ErrInvalidCredentails) {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentails"})
+			ctx.JSON(http.StatusUnauthorized, gin.H{"message": "invalid credentails"})
 			return
 		}
 		log.Error("failed login user")
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed login user"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "failed login user"})
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"token": token})

@@ -19,11 +19,11 @@ func (h *Handler) posts(ctx *gin.Context) {
 	limit, _ := strconv.Atoi(ctx.Query("limit"))
 
 	if offset < 0 {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "offset must be positive or zero"})
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": "offset must be positive or zero"})
 		return
 	}
 	if limit <= 0 {
-		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"error": "limit must be positive"})
+		ctx.IndentedJSON(http.StatusBadRequest, gin.H{"message": "limit must be positive"})
 		return
 	}
 
@@ -31,7 +31,7 @@ func (h *Handler) posts(ctx *gin.Context) {
 	if err != nil {
 		if !errors.Is(err, service.ErrPostsNotFound) {
 			log.Error("can't get posts")
-			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "can't get posts"})
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "can't get posts"})
 			return
 		}
 	}
@@ -42,10 +42,18 @@ func (h *Handler) savePost(ctx *gin.Context) {
 	const op = "handler.post"
 	log := h.log.With("op", op)
 
-	post := &models.Post{}
-	if err := ctx.BindJSON(&post); err != nil {
+	request := &CreatePostRequest{}
+	if err := ctx.BindJSON(&request); err != nil {
 		ctx.IndentedJSON(http.StatusBadRequest, nil)
 		return
+	}
+
+	authorName := ctx.GetString(userNameCtx)
+
+	var post *models.Post = &models.Post{
+		Title:      request.Title,
+		Content:    request.Content,
+		AuthorName: authorName,
 	}
 
 	id, err := h.postsService.SavePost(ctx.Request.Context(), post)

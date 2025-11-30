@@ -25,7 +25,7 @@ type Handler struct {
 type AuthService interface {
 	SignUp(ctx context.Context, name string, password string) (id []byte, err error)
 	SignIn(ctx context.Context, name string, password string) (token string, err error)
-	ParseToken(token string) (userId []byte, err error)
+	ParseToken(token string) (userId []byte, userName string, err error)
 }
 
 type PostsService interface {

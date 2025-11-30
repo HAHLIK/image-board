@@ -24,8 +24,6 @@ func (p *PostsService) GetPostsBatch(ctx context.Context, offset int64, limit in
 
 	log := p.Log.With("op", op)
 
-	log.Info("Attepmting get posts from cache")
-
 	posts, err := p.CacheProvider.GetPostsBatch(ctx, offset, limit)
 
 	if err != nil {
@@ -35,7 +33,6 @@ func (p *PostsService) GetPostsBatch(ctx context.Context, offset int64, limit in
 	if posts.Posts != nil {
 		return posts, nil
 	}
-	log.Info("Posts not found in cache, trying main provider")
 
 	posts, err = p.Provider.GetPostsBatch(ctx, offset, limit)
 	if err != nil {
@@ -43,11 +40,8 @@ func (p *PostsService) GetPostsBatch(ctx context.Context, offset int64, limit in
 		return models.Posts{}, utils.ErrWrap(op, err)
 	}
 	if posts.Posts == nil {
-		log.Info("Posts not found")
 		return models.Posts{}, utils.ErrWrap(op, ErrPostsNotFound)
 	}
-
-	log.Info("Succesfuly getting posts batch")
 	return posts, nil
 }
 
@@ -56,14 +50,10 @@ func (p *PostsService) SavePost(ctx context.Context, post *models.Post) (int64, 
 
 	log := p.Log.With("op", op)
 
-	log.Info("Attepmting save post")
-
 	id, err := p.Provider.SavePost(ctx, post)
 	if err != nil {
 		log.Error("Failed save post", utils.SlogErr(err))
 		return 0, utils.ErrWrap(op, err)
 	}
-
-	log.Info("Succesfuly save post")
 	return id, nil
 }

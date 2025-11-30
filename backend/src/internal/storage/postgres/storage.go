@@ -60,6 +60,7 @@ const (
     	id SERIAL PRIMARY KEY,
     	title TEXT NOT NULL,
     	content TEXT NOT NULL,
+		author_name TEXT NOT NULL,
  		time_stamp TIMESTAMP
 	);
 		CREATE TABLE IF NOT EXISTS users (

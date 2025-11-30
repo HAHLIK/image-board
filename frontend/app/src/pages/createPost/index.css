@@ -1,0 +1,120 @@
+.createPostPage {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.createContent {
+  padding: 2rem 0;
+}
+
+.createWrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem;
+  border-radius: 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+}
+
+.createTitle {
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.inputGroup {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.inputGroup label {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.publishBtn {
+  margin-top: 0.5rem;
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+.publishBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primaryBtn {
+  padding: 0.6rem 1.2rem;
+  background: var(--primary-color);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.primaryBtn:hover {
+  background: var(--bg-secondary);
+  color: var(--primary-color);
+}
+
+.primaryBtn:active {
+  opacity: 0.7;
+}
+
+.primaryBtn{
+  border-radius: 12px;
+  padding: 0.9em 1.4em;
+  font-size: 0.95em;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.primaryBtn::before{
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.primaryBtn:hover::before{
+  left: 100%;
+}
+
+.primaryBtn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: var(--border-light);
+}
+
+.primaryBtn:active, a:active{
+  transform: translateY(0);
+}
+
+.primaryBtn:focus-visible, a:focus-visible{
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .createWrapper {
+    padding: 1.5rem;
+  }
+
+  .createTitle {
+    font-size: 1.8rem;
+  }
+}
+

@@ -7,8 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/HAHLIK/image-board/config"
 	"github.com/HAHLIK/image-board/internal/app"
+	"github.com/HAHLIK/image-board/internal/config"
 	"github.com/HAHLIK/image-board/internal/handler"
 	"github.com/HAHLIK/image-board/internal/service"
 	"github.com/HAHLIK/image-board/internal/storage/postgres"

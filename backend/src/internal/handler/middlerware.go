@@ -9,27 +9,33 @@ import (
 
 const (
 	autharizationHeader = "Authorization"
-	userCtx             = "userId"
+	userIdCtx           = "userId"
+	userNameCtx         = "userName"
 )
 
 func (h *Handler) userIdentity(ctx *gin.Context) {
+	const op = "handler.signIn"
+	log := h.log.With("op", op)
+
 	header := ctx.GetHeader(autharizationHeader)
 	if header == "" {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "empty auth header"})
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "empty auth header"})
 		return
 	}
 
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid auth header"})
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "invalid auth header"})
 		return
 	}
 
-	userId, err := h.authService.ParseToken(headerParts[1])
+	userId, userName, err := h.authService.ParseToken(headerParts[1])
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "could not parse token"})
+		log.Info("could not parse token")
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "could not parse token"})
 		return
 	}
 
-	ctx.Set(userCtx, userId)
+	ctx.Set(userIdCtx, userId)
+	ctx.Set(userNameCtx, userName)
 }

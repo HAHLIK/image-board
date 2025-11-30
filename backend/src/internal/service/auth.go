@@ -41,7 +41,6 @@ func (a *AuthService) SignUp(ctx context.Context, name string, password string) 
 
 	_, err := a.UserProvider.User(ctx, name)
 	if err == nil {
-		log.Info("user is exist")
 		return nil, utils.ErrWrap(op, ErrUserIsExist)
 	}
 	if !errors.Is(err, storage.ErrIsNotExist) {
@@ -63,8 +62,6 @@ func (a *AuthService) SignUp(ctx context.Context, name string, password string) 
 		return nil, utils.ErrWrap(op, err)
 	}
 
-	log.Info("User registred")
-
 	return id, nil
 }
 
@@ -74,17 +71,15 @@ func (a *AuthService) SignIn(ctx context.Context, name string, password string) 
 	log := a.Log.With(
 		slog.String("op", op),
 	)
-	log.Info("Attempting to login user")
 
 	user, err := a.UserProvider.User(ctx, name)
 
 	if err != nil {
-		a.Log.Error("failed to get user", utils.SlogErr(err))
+		if errors.Is(err, storage.ErrIsNotExist) {
+			return "", utils.ErrWrap(op, ErrInvalidCredentails)
+		}
+		log.Error("failed to get user", utils.SlogErr(err))
 		return "", utils.ErrWrap(op, err)
-	}
-	if user.Name == "" {
-		a.Log.Info("user not found", utils.SlogErr(err))
-		return "", utils.ErrWrap(op, ErrInvalidCredentails)
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.PassHash, []byte(password)); err != nil {
@@ -99,12 +94,11 @@ func (a *AuthService) SignIn(ctx context.Context, name string, password string) 
 
 		return "", utils.ErrWrap(op, err)
 	}
-	log.Info("user logged in successfully")
 
 	return token, nil
 }
 
-func (a *AuthService) ParseToken(token string) ([]byte, error) {
+func (a *AuthService) ParseToken(token string) ([]byte, string, error) {
 	const op = "authService.ParseToken"
 
 	jwtToken, err := jwt.ParseWithClaims(token, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -115,14 +109,14 @@ func (a *AuthService) ParseToken(token string) ([]byte, error) {
 	})
 
 	if err != nil {
-		return nil, utils.ErrWrap(op, err)
+		return nil, "", utils.ErrWrap(op, err)
 	}
 
 	if claims, ok := jwtToken.Claims.(*UserClaims); ok && jwtToken.Valid {
-		return claims.UserID, nil
+		return claims.UserID, claims.Username, nil
 	}
 
-	return nil, utils.ErrWrap(op, ErrInvalidToken)
+	return nil, "", utils.ErrWrap(op, ErrInvalidToken)
 }
 
 func (a *AuthService) newToken(secret []byte, user models.User) (string, error) {
