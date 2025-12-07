@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/HAHLIK/image-board/utils"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
@@ -14,7 +14,7 @@ var (
 )
 
 type PostgresStorage struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
 func (p *PostgresStorage) MustConnect(ctx context.Context, url string, user string, password string) {
@@ -24,11 +24,7 @@ func (p *PostgresStorage) MustConnect(ctx context.Context, url string, user stri
 }
 
 func (p *PostgresStorage) Stop(ctx context.Context) {
-	const op = "postgres.Stop"
-
-	if err := p.db.Close(ctx); err != nil {
-		panic(utils.ErrWrap(op, err))
-	}
+	p.db.Close()
 }
 
 func (p *PostgresStorage) Init(ctx context.Context) error {
@@ -45,12 +41,12 @@ func (p *PostgresStorage) connect(ctx context.Context, url string, user string, 
 
 	connString := fmt.Sprintf("postgres://%s:%s@%s/postgres?sslmode=disable", user, password, url)
 
-	db, err := pgx.Connect(ctx, connString)
+	pool, err := pgxpool.New(ctx, connString)
 	if err != nil {
 		return utils.ErrWrap(op, err)
 	}
 
-	p.db = db
+	p.db = pool
 	return nil
 }
 

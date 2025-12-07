@@ -9,3 +9,7 @@ type CreatePostRequest struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
+
+type PostsByIDsRequest struct {
+	IDs []int64 `json:"ids"`
+}

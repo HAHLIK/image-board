@@ -37,10 +37,8 @@ func (p *PostgresStorage) SaveUser(ctx context.Context, name string, passhash []
 
 const (
 	QueryUser = `
-	(
-	SELECT * FROM users
-	WHERE name = $1
-	);
+	SELECT id, name, pass_hash FROM users
+	WHERE name = $1;
 	`
 
 	QuerySaveUser = `

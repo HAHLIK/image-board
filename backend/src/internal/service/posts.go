@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 
 	models "github.com/HAHLIK/image-board/domain"
@@ -9,9 +10,8 @@ import (
 )
 
 type PostsService struct {
-	CacheProvider Provider
-	Provider      Provider
-	Log           *slog.Logger
+	Provider Provider
+	Log      *slog.Logger
 }
 
 type Provider interface {
@@ -21,20 +21,10 @@ type Provider interface {
 
 func (p *PostsService) GetPostsBatch(ctx context.Context, offset int64, limit int64) (models.Posts, error) {
 	const op = "postsService.GetPosts"
-
 	log := p.Log.With("op", op)
 
-	posts, err := p.CacheProvider.GetPostsBatch(ctx, offset, limit)
-
-	if err != nil {
-		log.Error("Failed to get posts from cache", utils.SlogErr(err))
-		return models.Posts{}, utils.ErrWrap(op, err)
-	}
-	if posts.Posts != nil {
-		return posts, nil
-	}
-
-	posts, err = p.Provider.GetPostsBatch(ctx, offset, limit)
+	fmt.Println(offset, limit)
+	posts, err := p.Provider.GetPostsBatch(ctx, offset, limit)
 	if err != nil {
 		log.Error("Failed to get posts")
 		return models.Posts{}, utils.ErrWrap(op, err)

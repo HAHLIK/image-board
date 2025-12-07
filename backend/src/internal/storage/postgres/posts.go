@@ -21,6 +21,7 @@ func (p *PostgresStorage) GetPostsBatch(ctx context.Context, offset int64, limit
 		}
 		return models.Posts{}, utils.ErrWrap(op, err)
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var post models.Post
@@ -30,6 +31,7 @@ func (p *PostgresStorage) GetPostsBatch(ctx context.Context, offset int64, limit
 		batch.Posts = append(batch.Posts, &post)
 	}
 	return batch, nil
+
 }
 
 func (p *PostgresStorage) SavePost(ctx context.Context, post *models.Post) (int64, error) {
@@ -50,10 +52,10 @@ const (
 	RETURNING id;
 	`
 
-	QueryGetPosts = `(
-	SELECT * from posts
+	QueryGetPosts = `
+	SELECT id, title, content, author_name, time_stamp 
+	FROM posts
 	ORDER BY id DESC
-	LIMIT $2 OFFSET $1
-);
+	LIMIT $2 OFFSET $1;
 `
 )

@@ -45,9 +45,8 @@ func main() {
 
 	//Services
 	postsService := &service.PostsService{
-		CacheProvider: &postgresStorage,
-		Provider:      &postgresStorage,
-		Log:           log,
+		Provider: &postgresStorage,
+		Log:      log,
 	}
 
 	authService := &service.AuthService{
@@ -57,7 +56,7 @@ func main() {
 		Secret:       []byte(*authJWTSecret),
 	}
 
-	//handler
+	//Handler
 	handler := handler.New(
 		log,
 		authService,

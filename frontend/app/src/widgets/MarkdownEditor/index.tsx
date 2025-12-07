@@ -41,6 +41,7 @@ const MarkdownEditorWidget: React.FC<MarkdownEditorWidgetProps> = ({
           commands.table,
           commands.orderedListCommand,
           commands.unorderedListCommand,
+	        commands.image,
         ]}
       />
     </div>

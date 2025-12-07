@@ -1,38 +1,45 @@
 import './index.css';
 import PostWidget from '../../widgets/PostWidget';
 import AuthForm from '../../widgets/AuthForm';
+import Header from '../../widgets/Header'
 import { usePostsStore } from '../../store/posts';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useUserStore } from '../../store/user';
-import { Link } from 'react-router-dom';
 
-function MainPage() {
-  const { posts, getPostsRequest } = usePostsStore();
+export default function MainPage() {
+  const { posts, getPostsRequest, isLoading } = usePostsStore();
   const { name, isAuth, logout } = useUserStore();
   
+  const bottomRef = useRef(null);
+
   useEffect(() => {
     getPostsRequest();
   }, [getPostsRequest]);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && !isLoading) {
+          getPostsRequest();
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (bottomRef.current) {
+      observer.observe(bottomRef.current);
+    }
+    return () => observer.disconnect();
+  }, [isLoading, getPostsRequest]);
+
   return (
     <div className="mainPage">
-      <header className="mainHeader">
-        <div className="headerContent">
-          {isAuth ? (
-            <div className="profileHeader">
-              <span className="profileName">{name}</span>
-              <img 
-                className="profileAvatar" 
-                src="https://via.placeholder.com/40"
-              />
-              <Link to="/create-post" className="primaryBtn">
-                Создать пост
-              </Link>
-              <button className="primaryBtn" onClick={logout}>Выйти</button>
-            </div>
-          ) : null}
-        </div>
-      </header>
+      <Header
+        isAuth={isAuth}
+        userName={name}
+        avatarUrl=""
+        logout={logout}
+      />
       
       <main className="mainContent">
         <div className="contentWrapper">
@@ -44,7 +51,6 @@ function MainPage() {
             ) : (
               <div className="postsGrid">
                 {posts.map((post) => (
-                  console.log(post.author_name),
                   <PostWidget
                     key={post.id}
                     timeStamp={post.timestamp}
@@ -53,7 +59,12 @@ function MainPage() {
                     authorName={post.author_name}
                   />
                 ))}
+                <div ref={bottomRef} style={{ height: 1 }} />
               </div>
+            )}
+
+            {isLoading && (
+              <div className="loadingMore">Загрузка...</div>
             )}
           </div>
           
@@ -65,5 +76,3 @@ function MainPage() {
     </div>
   );
 }
-
-export default MainPage;
