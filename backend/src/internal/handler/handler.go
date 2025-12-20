@@ -25,12 +25,17 @@ type Handler struct {
 type AuthService interface {
 	SignUp(ctx context.Context, name string, password string) (id []byte, err error)
 	SignIn(ctx context.Context, name string, password string) (token string, err error)
-	ParseToken(token string) (userId []byte, userName string, err error)
+	User(ctx context.Context, id []byte) (user models.User, err error)
+	ParseToken(token string) (userId []byte, err error)
 }
 
 type PostsService interface {
 	GetPostsBatch(ctx context.Context, offset int64, limit int64) (posts models.Posts, err error)
 	SavePost(ctx context.Context, post *models.Post) (id int64, err error)
+	CommentsBatch(ctx context.Context, postID int64, offset int64, limit int64) (commets models.Comments, err error)
+	SaveComment(ctx context.Context, comment *models.Comment) (id int64, err error)
+	Vote(ctx context.Context, vote models.Vote) error
+	DeleteVote(ctx context.Context, vote models.Vote) error
 }
 
 func New(log *slog.Logger, authService AuthService, postsService PostsService) *Handler {
@@ -47,6 +52,15 @@ func (h *Handler) Init() {
 	{
 		posts.GET("", h.posts)
 		posts.POST("", h.userIdentity, h.savePost)
+
+		ac := posts.Group("/:post_id")
+		{
+			ac.PUT("/vote", h.userIdentity, h.vote)
+			ac.DELETE("/vote", h.userIdentity, h.deleteVote)
+
+			ac.GET("/comments", h.comments)
+			ac.POST("/comments", h.userIdentity, h.saveComment)
+		}
 	}
 
 	a := h.router.Group("/auth")

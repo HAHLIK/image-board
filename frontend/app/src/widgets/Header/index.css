@@ -10,7 +10,6 @@
 .headerContent {
   max-width: 1300px;
   margin: 0 auto;
-  padding: 0 0rem;
   min-height: 70px;
 }
 
@@ -113,7 +112,6 @@
   
   .profileHeader {
     flex-wrap: wrap;
-    justify-content: flex-end;
     padding-right: 1rem;
   }
 }

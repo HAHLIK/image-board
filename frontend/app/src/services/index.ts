@@ -1,7 +1,6 @@
 import {$api, $auth} from "../http";
-import type { Post } from "../models/models";
 import type { AxiosResponse } from "axios";
-import type { LoginResponse, PostsResponse } from "../models/models";
+import type { LoginResponse, PostsResponse, CommentsResponse} from "../models/models";
 
 export class AuthService {
     static async login(name: string, password: string): Promise<AxiosResponse<LoginResponse>> {
@@ -20,18 +19,40 @@ export class PostService {
                 offset: offset, 
                 limit: limit
             }})
-        response.data.posts = normalizeTimeStamp(response.data.posts)
-
+        response.data.batch = response.data.batch.map(el => ({
+            ...el,
+            timestamp: new Date(el.timestamp).toLocaleString()
+        }))
         return response
     }
+
     static async createPost(title: string, content: string): Promise<AxiosResponse> {
         return await $api.post('/posts', {title, content})
     }
-}
 
-function normalizeTimeStamp(posts: Post[]) {
-  return posts.map(post => ({
-    ...post,
-    timestamp: new Date(post.timestamp).toLocaleString()
-  }))
+    static async comments(offset: number, limit: number, postId: number): Promise<AxiosResponse<CommentsResponse>> {
+        const response = await $api.get<CommentsResponse>(`/posts/${postId}/comments`, {
+            params: {
+                offset: offset,
+                limit: limit
+            }
+        })
+        response.data.batch = response.data.batch.map(el => ({
+            ...el,
+            timestamp: new Date(el.timestamp).toLocaleString()
+        }))
+        return response
+    }
+
+    static async createComment(content: string, postId: number): Promise<AxiosResponse> {
+        return await $api.post(`/posts/${postId}/comments`, {content})
+    }
+
+    static async vote(postId: number, value: number): Promise<AxiosResponse> {
+        return await $api.put(`/posts/${postId}/vote`, {value})
+    }
+
+    static async deleteVote(postId: number): Promise<AxiosResponse> {
+        return await $api.delete(`/posts/${postId}/vote`)
+    }
 }

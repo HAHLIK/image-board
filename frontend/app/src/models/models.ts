@@ -3,6 +3,14 @@ export interface Post {
     timestamp: string,
     title: string,
     content: string,
+    author_name: string,
+    rating: number
+}
+
+export interface Comment {
+    id: number,
+    timestamp: string,
+    content: string,
     author_name: string
 }
 
@@ -11,5 +19,9 @@ export interface LoginResponse {
 }
 
 export interface PostsResponse {
-    posts: Post[]
+    batch: Post[]
+}
+
+export interface CommentsResponse {
+    batch: Comment[]
 }

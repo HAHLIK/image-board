@@ -4,7 +4,8 @@ import "errors"
 
 var (
 	ErrInvalidToken       = errors.New("invalid token")
-	ErrUserIsExist        = errors.New("user is exist")
-	ErrPostsNotFound      = errors.New("posts not found")
+	ErrUserIsNotExist     = errors.New("user is not exist")
+	ErrUserIsExist        = errors.New("user is not exist")
+	ErrNotFound           = errors.New("not found")
 	ErrInvalidCredentails = errors.New("invalid credentails")
 )

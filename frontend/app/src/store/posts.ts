@@ -1,79 +1,98 @@
-import { create } from "zustand"
+import { create } from "zustand";
 import type { Post } from "../models/models";
 import { PostService } from "../services";
 
 interface PostState {
-    offset: number,
-    limit: number,
-    posts: Post[],
-    isLoading: boolean,
-    setPosts: (posts: Post[]) => void;
-    getPostsRequest: () => Promise<void>;
-    createPostRequest: (title: string, content: string) => Promise<void>;
+  offset: number;
+  limit: number;
+  commentsLimit: number;
+  commentOffsetByPostId: Record<number, number>
+  posts: Post[];
+  isLoading: boolean;
+  hasMore: boolean;
+  setPosts: (posts: Post[]) => void;
+  getPostsRequest: () => Promise<void>;
+  createPostRequest: (title: string, content: string) => Promise<void>;
+  getCommentsRequest: () => Promise<void>;
+  createCommentRequest: (postId: number, content: string) => Promise<void>;
+  voteRequest: (postId: number, value: number) => Promise<void>;
+  deleteVoteRequest: (postId: number) => Promise<void>;
 }
 
 export const usePostsStore = create<PostState>((set, get) => ({
-    offset: 0,
-    limit: 2,
-    isLoading: false,
-    posts: [{
-        id: 1,
-        timestamp: "2025-11-02, 06:49:28",
-        title: "How make border in CSS?",
-        content: `# План
-## pLTE
-- ### Что это?
+  offset: 0,
+  limit: 2,
+  commentsLimit: 10,
+  commentOffsetByPostId: {},
+  isLoading: false,
+  hasMore: true,
+  posts: [],
+  setPosts: (posts: Post[]) => set({ posts }),
 
-	pLTE (private LTE) - это выделенная, приватная сетевая инфраструктура, которая использует лицензированный спектр LTE (и/или 5G) для обеспечения связи на ограниченной территории (завод, порт, шахта, сельхозугодья). pLTE включает в себя другие стандарты связи например: NB-IoT. 
+  getPostsRequest: async () => {
+    if (get().isLoading || !get().hasMore) return;
 
-- ### Как запустить сеть?
-	Внедрение pLTE выглядит так: вы создаёте ядро сети и расставляете базовые станции по территории предприятия. Ядро сети обычно ставится прямо в серверную завода либо, если объединяется несколько предприятий в разных точках, — в какой-то промежуточный ЦОД. То есть внешне похоже, как в случае с Wi-Fi-сетью, но есть ряд серьёзных отличий:
-	1. **SIM-карты**:
-	Редко это физические компьютеры на маленьких пластиковых карточках, чаще это встроенный чип в датчик или терминал, куда нужно передать ключи. Чаще всего речь идёт о пакетах по нескольку тысяч виртуальных симок с особыми тарифами, получается это очень экономично.  
-	
-	2. **Лицензируемый спектр частот**:
-	 То есть частоты сети будут только и исключительно вашими, и в них никто больше, кроме вас, не залезет. Частоты сейчас выделяет оператор (тот же самый, который выдаст симки). Вы арендуете полосу у оператора, а он заботится обо всех согласованиях. 
+    set({ isLoading: true });
+    try {
+      const offset = get().offset;
+      const limit = get().limit;
+      const response = await PostService.posts(offset, limit);
 
-Если на предприятии уже есть промышленный Wi-Fi, то возможна интеграция с ним, это обычно не проблема.  
+      const batch: Post[] = response?.data?.batch ?? [];
 
-- ### Что может pLTE и его преимущесва:
+      if (batch.length > 0) {
+        const existing = get().posts;
+        const merged = [...existing, ...batch].reduce<Post[]>((acc, p) => {
+          if (!acc.find(x => x.id === p.id)) acc.push(p);
+          return acc;
+        }, []);
 
-	Как уже говорилось ранее pLTE включает в себя другие часто используемые стандарты связи, что дает ему большое преимущество. Достаточно развернуть сеть на всей необходимой территории, чтобы получить все или почти все необходимое.
-	
-	**pLTE имеет**:
-	2. **Высокоскоростные потоки данных.** pLTE — соединение в беспроводную быструю сеть. Для всех устройств, запитанных от сети, это стандартный формат передачи данных. Чаще всего бывает полезен на видеокамерах.
-  
-	3. **Энергоэффективная передача данных.** Это [NB-IoT](htps://ru.wikipedia.org/wiki/NB_IoT), который «из коробки» доступен на pLTE-станциях. Вы можете взять огромное количество датчиков на батарейках, разложить их по предприятию и знать, что они передают данные от своей батареи три–пять лет.
-  
-	4. **Mission Critical PTT** — стандарт связи по нажатию кнопки на устройстве. Это и удобная связь «как на рациях» без долгого установления соединения, и деградационный протокол, который позволит работать в случае отказов части сети. Когда сеть полная, её пакеты по умолчанию приоритезируются.  
-	
-	Для каждого типа связи и каждого сервиса можно настроить свой уровень, приоритет. Приоритеты регулируются администратором pLTE в интересах предприятия.  Учитывая свой спектр, сигнал будет передан с таким-то уровнем приоритета и понятным (но не гарантированным) временем доставки. В обычных Wi-Fi-сетях это практически недостижимо. `,
-        author_name: "TeBMG"
-    }],
-    setPosts: (posts: Post[]) => set({ posts }),
-
-    getPostsRequest: async () => {
-        try {
-            const offset: number = get().offset
-            const limit: number = get().limit
-            const response = await PostService.posts(offset, limit)
-            set({
-                posts: [...get().posts, ...response.data.posts],
-                offset: offset + limit,
-                isLoading: false
-            })
-        } 
-        catch (e: any) {
-            console.error(e)
-        }
-    },
-
-    createPostRequest: async (title: string, content: string) => {
-        try {
-            await PostService.createPost(title, content)
-        } 
-        catch (e: any) {
-            console.error(e)
-        }
+        set({
+          posts: merged,
+          offset: offset + batch.length,
+          hasMore: batch.length >= limit,
+        });
+      } else {
+        set({ hasMore: false });
+      }
+    } catch (err) {
+      console.error("getPostsRequest error:", err);
+    } finally {
+      set({ isLoading: false });
     }
-}))
+  },
+
+  createPostRequest: async (title: string, content: string) => {
+    try {
+      await PostService.createPost(title, content);
+    } catch (e: any) {
+      console.error(e);
+    }
+  },
+
+  getCommentsRequest: async () => {
+    
+  },
+  createCommentRequest: async (postId: number, content: string) => {
+      try {
+        await PostService.createComment(content, postId);
+      } catch (e: any) {
+        console.error(e);
+      }
+  },
+
+  voteRequest: async (postId: number, value: number) => {
+    try {
+      await PostService.vote(postId, value);
+    } catch (e: any) {
+      console.error(e);
+    }
+  },
+  deleteVoteRequest: async (postId: number) => {
+    try {
+      await PostService.deleteVote(postId);
+    } catch (e: any) {
+      console.error(e);
+    }
+  }
+}));

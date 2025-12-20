@@ -10,7 +10,6 @@ import (
 const (
 	autharizationHeader = "Authorization"
 	userIdCtx           = "userId"
-	userNameCtx         = "userName"
 )
 
 func (h *Handler) userIdentity(ctx *gin.Context) {
@@ -29,13 +28,11 @@ func (h *Handler) userIdentity(ctx *gin.Context) {
 		return
 	}
 
-	userId, userName, err := h.authService.ParseToken(headerParts[1])
+	userId, err := h.authService.ParseToken(headerParts[1])
 	if err != nil {
 		log.Info("could not parse token")
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "could not parse token"})
 		return
 	}
-
-	ctx.Set(userIdCtx, userId)
-	ctx.Set(userNameCtx, userName)
+	ctx.Set(userIdCtx, string(userId))
 }

@@ -58,7 +58,7 @@ func (h *Handler) signIn(ctx *gin.Context) {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"message": "invalid credentails"})
 			return
 		}
-		log.Error("failed login user")
+		log.Error("failed login user: ", utils.SlogErr(err))
 		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "failed login user"})
 		return
 	}

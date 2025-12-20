@@ -10,12 +10,26 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (p *PostgresStorage) User(ctx context.Context, name string) (models.User, error) {
+func (p *PostgresStorage) User(ctx context.Context, id []byte) (models.User, error) {
 	const op = "postgres.User"
 
 	var user models.User
 
-	if err := p.db.QueryRow(ctx, QueryUser, name).Scan(&user.Id, &user.Name, &user.PassHash); err != nil {
+	if err := p.db.QueryRow(ctx, QueryUser, id).Scan(&user.Id, &user.Name, &user.PassHash); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return models.User{}, utils.ErrWrap(op, storage.ErrIsNotExist)
+		}
+		return models.User{}, utils.ErrWrap(op, err)
+	}
+	return user, nil
+}
+
+func (p *PostgresStorage) UserByName(ctx context.Context, name string) (models.User, error) {
+	const op = "postgres.UserByName"
+
+	var user models.User
+
+	if err := p.db.QueryRow(ctx, QueryUserByName, name).Scan(&user.Id, &user.Name, &user.PassHash); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return models.User{}, utils.ErrWrap(op, storage.ErrIsNotExist)
 		}
@@ -37,6 +51,11 @@ func (p *PostgresStorage) SaveUser(ctx context.Context, name string, passhash []
 
 const (
 	QueryUser = `
+	SELECT id, name, pass_hash FROM users
+	WHERE id = $1;
+	`
+
+	QueryUserByName = `
 	SELECT id, name, pass_hash FROM users
 	WHERE name = $1;
 	`

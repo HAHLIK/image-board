@@ -2,20 +2,39 @@ package models
 
 import "time"
 
-type Posts struct {
-	Posts []*Post `json:"posts"`
+type Post struct {
+	Id        int64
+	Title     string
+	Content   string
+	AuthorId  []byte
+	Rating    int
+	TimeStamp time.Time
 }
 
-type Post struct {
-	Id         int64     `json:"id"`
-	Title      string    `json:"title"`
-	Content    string    `json:"content"`
-	AuthorName string    `json:"author_name"`
-	TimeStamp  time.Time `json:"timestamp"`
+type Posts struct {
+	Posts []*Post
 }
 
 type User struct {
 	Id       []byte
 	Name     string
 	PassHash []byte
+}
+
+type Comment struct {
+	Id        int64
+	PostId    int64
+	AuthorId  []byte
+	Content   string
+	TimeStamp time.Time
+}
+
+type Comments struct {
+	Comments []*Comment
+}
+
+type Vote struct {
+	PostId   int64
+	AuthorId []byte
+	Value    int8
 }

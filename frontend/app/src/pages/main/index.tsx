@@ -1,36 +1,60 @@
 import './index.css';
 import PostWidget from '../../widgets/PostWidget';
 import AuthForm from '../../widgets/AuthForm';
-import Header from '../../widgets/Header'
-import { usePostsStore } from '../../store/posts';
+import Header from '../../widgets/Header';
 import { useEffect, useRef } from 'react';
+import { usePostsStore } from '../../store/posts';
 import { useUserStore } from '../../store/user';
 
 export default function MainPage() {
-  const { posts, getPostsRequest, isLoading } = usePostsStore();
-  const { name, isAuth, logout } = useUserStore();
-  
-  const bottomRef = useRef(null);
+  const posts = usePostsStore(state => state.posts);
+  const isLoading = usePostsStore(state => state.isLoading);
+  const hasMore = usePostsStore(state => state.hasMore);
+  const getPostsRequest = usePostsStore(state => state.getPostsRequest);
+  const voteRequest = usePostsStore(state => state.voteRequest);
+  const deleteVoteRequest = usePostsStore(state => state.deleteVoteRequest)
+
+  const vote = (postId: number, value: number) => {
+
+    if (value === 0) deleteVoteRequest(postId)
+    else voteRequest(postId, value)
+  }
+
+  const name = useUserStore(state => state.name);
+  const isAuth = useUserStore(state => state.isAuth);
+  const logout = useUserStore(state => state.logout);
+
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     getPostsRequest();
   }, [getPostsRequest]);
 
   useEffect(() => {
+    if (!hasMore) return;
+
+    const el = bottomRef.current;
+    if (!el) return;
+
     const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting && !isLoading) {
+      (entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && !isLoading) {
           getPostsRequest();
         }
       },
-      { threshold: 1 }
+      {
+        root: null,
+        rootMargin: '200px',
+        threshold: 0.1,
+      }
     );
+    observer.observe(el);
 
-    if (bottomRef.current) {
-      observer.observe(bottomRef.current);
-    }
-    return () => observer.disconnect();
-  }, [isLoading, getPostsRequest]);
+    return () => {
+      observer.disconnect();
+    };
+  }, [posts.length, isLoading, hasMore, getPostsRequest]);
 
   return (
     <div className="mainPage">
@@ -40,7 +64,7 @@ export default function MainPage() {
         avatarUrl=""
         logout={logout}
       />
-      
+
       <main className="mainContent">
         <div className="contentWrapper">
           <div className="postsSection">
@@ -57,17 +81,23 @@ export default function MainPage() {
                     title={post.title}
                     content={post.content}
                     authorName={post.author_name}
+                    initialRating={post.rating}
+                    voteF={(value) => {vote(post.id, value)}}
                   />
                 ))}
-                <div ref={bottomRef} style={{ height: 1 }} />
               </div>
             )}
+
+            <div ref={bottomRef} style={{ height: 1, width: '100%' }} />
 
             {isLoading && (
               <div className="loadingMore">Загрузка...</div>
             )}
+            {!hasMore && posts.length > 0 && (
+              <div className="noMorePosts">Больше постов нет</div>
+            )}
           </div>
-          
+
           <aside className="sidebar">
             {!isAuth && <AuthForm />}
           </aside>

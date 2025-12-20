@@ -13,14 +13,6 @@ $api.interceptors.request.use((config) => {
     return config;
 })
 
-// $api.interceptors.response.use((config) => {
-//     return config;
-// }, (e) => {
-//     if (e.response.status === HttpStatusCode.Unauthorized) {
-
-//     }
-// })
-
 export const $auth = axios.create({
     withCredentials: true,
     baseURL: AUTH_API,

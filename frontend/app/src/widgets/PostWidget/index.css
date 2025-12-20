@@ -1,6 +1,7 @@
 .postWidget {
     margin-bottom: 1.5rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeInUp 0.6s ease-out;
 }
 
 .mainBlock {
@@ -49,24 +50,127 @@
 
 .contentSection {
     padding: 0 2rem 1rem;
+    position: relative;
 }
 
 .contentSection h1 {
-  font-size: 1.3rem !important;
-  font-weight: 600;
-  margin-top: 1.5rem;
-  margin-bottom: 1rem;
+    font-size: 1.3rem !important;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .contentSection h2 {
-  font-size: 1.1rem !important;
-  font-weight: 500;
-  margin-top: 1.25rem;
-  margin-bottom: 0.75rem;
+    font-size: 1.1rem !important;
+    font-weight: 500;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
 }
 
 .contentSection p {
-  font-size: 0.93rem !important;
+    font-size: 0.93rem !important;
+}
+
+.contentSection img {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    border-radius: 0.4rem;
+    display: block;
+    margin: 1.1rem auto;
+    object-fit: contain;
+    background: var(--bg-elevated);
+}
+
+.contentSection--collapsed {
+    position: relative;
+    overflow: hidden;
+}
+
+.contentSection--collapsed:after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 6.5em;
+    pointer-events: none;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.123));
+    z-index: 2;
+}
+
+.toggleButton {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-top: 1em;
+    transition: color 0.2s;
+    padding: 0;
+    font-weight: 500;
+}
+
+.bottomActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1em;
+    padding: 0.6em 2em 1em 2em;
+    border-top: 1px solid var(--bg-secondary);
+}
+
+.ratingSection.ratingSection--bottom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.6em;
+}
+
+.ratingButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    font-size: 1.28em;
+    color: var(--text-muted, #5c7fa3);
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0.18em 0.15em;
+    border-radius: 50%;
+    outline: none;
+    background: none;
+}
+
+.ratingButton--up:hover {
+    color: var(--primary-color, #2b7cff);
+}
+
+.ratingButton--down:hover {
+    color: #ea4848;
+}
+
+.ratingArrow {
+    font-size: 1.15em;
+    line-height: 1;
+    color: inherit;
+}
+
+.ratingButton--voted {
+    color: var(--primary-color);
+    cursor: default;
+}
+.ratingButton--down.ratingButton--voted {
+    color: #ea4848;
+}
+
+.ratingValue {
+    font-weight: 600;
+    font-size: 1.13em;
+    margin: 0 0.15em;
+}
+
+.ratingButton:disabled {
+    opacity: 0.65;
+    cursor: default;
 }
 
 @keyframes fadeInUp {
@@ -80,8 +184,13 @@
     }
 }
 
-.postWidget {
-    animation: fadeInUp 0.6s ease-out;
+@media (max-width: 1040px) {
+    .contentSection img {
+        max-width: 100%;
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+    }
 }
 
 @media (max-width: 768px) {
@@ -90,32 +199,45 @@
         margin: 0 0.5rem 0 0.5rem;
         border-radius: 0.75rem;
     }
-    
+
     .headerSection {
         padding: 0.625rem 1.25rem;
     }
-    
+
     .titleSection {
         padding: 1rem 1rem 0.375rem;
     }
-    
+
     .title {
         font-size: 1.35rem;
     }
-    
+
     .contentSection {
         padding: 0 1.5rem 1rem;
     }
-    
+
     .contentSection .w-md-editor-preview h1 {
         font-size: 1.125rem;
     }
-    
+
     .contentSection .w-md-editor-preview h2 {
         font-size: 1rem;
     }
-    
+
     .contentSection .w-md-editor-preview {
         font-size: 0.9rem;
+    }
+
+    .ratingSection.ratingSection--bottom {
+        padding-left: 0.1em;
+        padding-right: 0.1em;
+    }
+    .contentSection img {
+        max-width: 100%;
+        width: 100%;
+        height: auto;
+        border-radius: 0.4rem;
+        margin: 1.1rem auto;
+        object-fit: contain;
     }
 }

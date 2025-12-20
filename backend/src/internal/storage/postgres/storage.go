@@ -52,17 +52,30 @@ func (p *PostgresStorage) connect(ctx context.Context, url string, user string, 
 
 const (
 	QueryInit = `
-		CREATE TABLE IF NOT EXISTS posts (
-    	id SERIAL PRIMARY KEY,
-    	title TEXT NOT NULL,
-    	content TEXT NOT NULL,
-		author_name TEXT NOT NULL,
- 		time_stamp TIMESTAMP
-	);
 		CREATE TABLE IF NOT EXISTS users (
-    	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    	name VARCHAR(35) NOT NULL,                    
-    	pass_hash BYTEA NOT NULL                      
-	);
+  			id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  			name      VARCHAR(35) NOT NULL,
+  			pass_hash BYTEA NOT NULL
+		);
+		CREATE TABLE IF NOT EXISTS posts (
+  			id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+ 			author_id  UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  			title      TEXT NOT NULL,
+  			content    TEXT NOT NULL,
+  			time_stamp TIMESTAMP
+		);
+		CREATE TABLE IF NOT EXISTS comments (
+  			id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  			post_id    BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  			author_id  UUID REFERENCES users(id) ON DELETE SET NULL,
+  			content    TEXT NOT NULL,
+			time_stamp TIMESTAMP
+		);
+		CREATE TABLE IF NOT EXISTS votes (
+    		post_id   BIGINT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+    		author_id   UUID   NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    		value     SMALLINT NOT NULL CHECK (value IN (-1, 1)),
+    		PRIMARY KEY (post_id, author_id)
+		);
 	`
 )
