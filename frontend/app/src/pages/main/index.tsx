@@ -82,6 +82,7 @@ export default function MainPage() {
                     content={post.content}
                     authorName={post.author_name}
                     initialRating={post.rating}
+                    initialVote={post.user_vote}
                     voteF={(value) => {vote(post.id, value)}}
                   />
                 ))}

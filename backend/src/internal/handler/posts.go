@@ -36,6 +36,7 @@ func (h *Handler) posts(ctx *gin.Context) {
 			return
 		}
 	}
+	userIdString := ctx.GetString(userIdCtx)
 
 	responce := PostsBatchResponce{Batch: make([]*Post, 0)}
 	for _, post := range posts.Posts {
@@ -51,6 +52,14 @@ func (h *Handler) posts(ctx *gin.Context) {
 			AuthorName: authorName,
 			Rating:     post.Rating,
 			TimeStamp:  post.TimeStamp,
+		}
+		if len(userIdString) > 0 {
+			userVote, err := h.postsService.GetVote(ctx, []byte(userIdString), post.Id)
+			if err != nil {
+				log.Error("can't get vote", utils.SlogErr(err))
+				ctx.AbortWithStatus(http.StatusInternalServerError)
+			}
+			postResponce.UserVote = userVote.Value
 		}
 		responce.Batch = append(responce.Batch, &postResponce)
 	}

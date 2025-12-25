@@ -20,6 +20,7 @@ type Provider interface {
 	SaveComment(ctx context.Context, comment *models.Comment) (id int64, err error)
 	Vote(ctx context.Context, vote models.Vote) error
 	DeleteVote(ctx context.Context, vote models.Vote) error
+	GetVote(ctx context.Context, authorId []byte, postId int64) (vote models.Vote, err error)
 }
 
 func (p *PostsService) GetPostsBatch(ctx context.Context, offset int64, limit int64) (models.Posts, error) {
@@ -105,4 +106,17 @@ func (p *PostsService) DeleteVote(ctx context.Context, vote models.Vote) error {
 		return utils.ErrWrap(op, err)
 	}
 	return nil
+}
+
+func (p *PostsService) GetVote(ctx context.Context, authorId []byte, postId int64) (models.Vote, error) {
+	const op = "postsService.UserIsVote"
+
+	log := p.Log.With("op", op)
+
+	vote, err := p.Provider.GetVote(ctx, authorId, postId)
+	if err != nil {
+		log.Error("Failed check user vote", utils.SlogErr(err))
+		return vote, utils.ErrWrap(op, err)
+	}
+	return vote, nil
 }

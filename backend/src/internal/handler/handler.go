@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"net/http"
 
 	models "github.com/HAHLIK/image-board/domain"
 	"github.com/HAHLIK/image-board/utils"
@@ -36,6 +37,7 @@ type PostsService interface {
 	SaveComment(ctx context.Context, comment *models.Comment) (id int64, err error)
 	Vote(ctx context.Context, vote models.Vote) error
 	DeleteVote(ctx context.Context, vote models.Vote) error
+	GetVote(ctx context.Context, authorId []byte, postId int64) (vote models.Vote, err error)
 }
 
 func New(log *slog.Logger, authService AuthService, postsService PostsService) *Handler {
@@ -50,7 +52,7 @@ func New(log *slog.Logger, authService AuthService, postsService PostsService) *
 func (h *Handler) Init() {
 	posts := h.router.Group("/api/posts")
 	{
-		posts.GET("", h.posts)
+		posts.GET("", h.userIdentityWithoutAbort, h.posts)
 		posts.POST("", h.userIdentity, h.savePost)
 
 		ac := posts.Group("/:post_id")
@@ -65,6 +67,14 @@ func (h *Handler) Init() {
 
 	a := h.router.Group("/auth")
 	{
+		a.GET("/token-valid", func(ctx *gin.Context) {
+			userId := h._userIdentityWithoutAbort(ctx)
+			if userId != nil {
+				ctx.IndentedJSON(http.StatusOK, gin.H{"valid": true})
+				return
+			}
+			ctx.IndentedJSON(http.StatusOK, gin.H{"valid": false})
+		})
 		a.POST("/sign-up", h.signUp)
 		a.POST("/sign-in", h.signIn)
 	}

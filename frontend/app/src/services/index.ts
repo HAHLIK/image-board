@@ -1,6 +1,6 @@
 import {$api, $auth} from "../http";
 import type { AxiosResponse } from "axios";
-import type { LoginResponse, PostsResponse, CommentsResponse} from "../models/models";
+import type { LoginResponse, PostsResponse, CommentsResponse, TokenValidResponce} from "../models/models";
 
 export class AuthService {
     static async login(name: string, password: string): Promise<AxiosResponse<LoginResponse>> {
@@ -9,6 +9,16 @@ export class AuthService {
 
     static async registration(name: string, password: string): Promise<AxiosResponse> {
         return $auth.post('/sign-up', {name, password})
+    }
+    
+    static async tokenIsValid(): Promise<AxiosResponse<TokenValidResponce>> {
+        const token = localStorage.getItem('token');
+
+        return $auth.get('/token-valid', {
+            headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
     }
 }
 

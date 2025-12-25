@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useUserStore } from '../../store/user';
 import './index.css';
 import MDEditor from '@uiw/react-md-editor';
 
@@ -9,6 +10,7 @@ type PostProps = {
   authorName: string;
   collapseThreshold?: number;
   initialRating?: number;
+  initialVote?: number;
   voteF: (value: number) => void;
 };
 
@@ -25,49 +27,73 @@ function PostWidget(props: PostProps) {
     authorName,
     collapseThreshold = 1000,
     initialRating = 0,
-    voteF
+    initialVote = 0,
+    voteF,
   } = props;
 
-  const [collapsed, setCollapsed] = useState(true);
-  const isLong = content.length > collapseThreshold;
-  const contentToShow = isLong && collapsed
-    ? truncateMarkdown(content, collapseThreshold)
-    : content;
+  const isAuth = useUserStore(state => state.isAuth);
 
+  const [collapsed, setCollapsed] = useState(true);
   const [rating, setRating] = useState(initialRating);
-  const [vote, setVote] = useState<'none' | 'up' | 'down'>('none');
+  const [vote, setVote] = useState<'none' | 'up' | 'down'>(() => {
+    if (initialVote === 1) return 'up';
+    if (initialVote === -1) return 'down';
+    return 'none';
+});
+  const [authMessage, setAuthMessage] = useState<string | null>(null);
+
+  const isLong = content.length > collapseThreshold;
+  const contentToShow =
+    isLong && collapsed
+      ? truncateMarkdown(content, collapseThreshold)
+      : content;
+
+  const showAuthMessage = () => {
+    setAuthMessage('Войдите или зарегистрируйтесь, чтобы голосовать');
+    setTimeout(() => setAuthMessage(null), 2500);
+  };
 
   const createVote = (value: 'none' | 'up' | 'down') => {
-    setVote(value)
-    if (value === 'none') voteF(0)
-    else if (value === 'down') voteF(-1)
-    else voteF(1) 
-  }
+    setVote(value);
+    if (value === 'none') voteF(0);
+    else if (value === 'down') voteF(-1);
+    else voteF(1);
+  };
 
   const handleUpvote = () => {
+    if (!isAuth) {
+      showAuthMessage();
+      return;
+    }
+
     if (vote === 'up') {
       setRating(rating - 1);
       createVote('none');
     } else {
-      createVote('up')
+      createVote('up');
       if (vote === 'none') setRating(rating + 1);
       else setRating(rating + 2);
     }
   };
 
   const handleDownvote = () => {
+    if (!isAuth) {
+      showAuthMessage();
+      return;
+    }
+
     if (vote === 'down') {
       setRating(rating + 1);
       createVote('none');
     } else {
-      createVote('down')
-      if (vote === "none") setRating(rating - 1);
-      else setRating(rating - 2)
+      createVote('down');
+      if (vote === 'none') setRating(rating - 1);
+      else setRating(rating - 2);
     }
   };
 
   return (
-    <div className='postWidget'>
+    <div className="postWidget">
       <div className="mainBlock">
         <section className="headerSection">
           <span className="authorName">{authorName}</span>
@@ -79,7 +105,9 @@ function PostWidget(props: PostProps) {
         </section>
 
         <section
-          className={`contentSection${isLong && collapsed ? ' contentSection--collapsed' : ''}`}
+          className={`contentSection${
+            isLong && collapsed ? ' contentSection--collapsed' : ''
+          }`}
         >
           <MDEditor.Markdown
             source={contentToShow}
@@ -91,28 +119,36 @@ function PostWidget(props: PostProps) {
             }}
           />
         </section>
+
         <section className="bottomActions">
           {isLong ? (
             <button
               className="toggleButton"
               onClick={() => setCollapsed(!collapsed)}
             >
-              {collapsed ? "Показать полностью" : "Свернуть"}
+              {collapsed ? 'Показать полностью' : 'Свернуть'}
             </button>
-          ) : <div></div>}
+          ) : (
+            <div />
+          )}
+
           <div className="ratingSection ratingSection--bottom">
             <button
-              className={`ratingButton ratingButton--up${vote === 'up' ? " ratingButton--voted" : ""}`}
-              title="Плюсануть"
+              className={`ratingButton ratingButton--up${
+                vote === 'up' ? ' ratingButton--voted' : ''
+              }`}
               onClick={handleUpvote}
               aria-label="Плюсануть"
             >
               <span className="ratingArrow">▲</span>
             </button>
+
             <span className="ratingValue">{rating}</span>
+
             <button
-              className={`ratingButton ratingButton--down${vote === 'down' ? " ratingButton--voted" : ""}`}
-              title="Заминусить"
+              className={`ratingButton ratingButton--down${
+                vote === 'down' ? ' ratingButton--voted' : ''
+              }`}
               onClick={handleDownvote}
               aria-label="Заминусить"
             >
@@ -120,6 +156,12 @@ function PostWidget(props: PostProps) {
             </button>
           </div>
         </section>
+
+        {authMessage && (
+          <div className="authMessage">
+            {authMessage}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -106,6 +106,18 @@ func (p *PostgresStorage) DeleteVote(ctx context.Context, vote models.Vote) erro
 	return nil
 }
 
+func (p *PostgresStorage) GetVote(ctx context.Context, authorId []byte, postId int64) (vote models.Vote, err error) {
+	const op = "postgres.GetVote"
+
+	if err = p.db.QueryRow(ctx, QueryGetVote, postId, authorId).Scan(&vote.PostId, &vote.AuthorId, &vote.Value); err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return models.Vote{}, utils.ErrWrap(op, err)
+		}
+		return models.Vote{}, nil
+	}
+	return vote, nil
+}
+
 const (
 	QuerySavePost = `
 	INSERT INTO posts (title, content, author_id, time_stamp)
@@ -145,5 +157,11 @@ const (
 	QueryDeleteVote = `
 	DELETE FROM votes
     WHERE post_id = $1 AND author_id = $2
+	`
+
+	QueryGetVote = `
+	SELECT post_id, author_id, value
+	FROM votes
+	WHERE post_id = $1 AND author_id = $2
 	`
 )

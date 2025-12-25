@@ -12,8 +12,33 @@ const (
 	userIdCtx           = "userId"
 )
 
+func (h *Handler) userIdentityWithoutAbort(ctx *gin.Context) {
+	userId := h._userIdentityWithoutAbort(ctx)
+	if userId != nil {
+		ctx.Set(userIdCtx, string(userId))
+	}
+}
+
+func (h *Handler) _userIdentityWithoutAbort(ctx *gin.Context) []byte {
+	const op = "handler.userIdentityWithoutAbort"
+
+	header := ctx.GetHeader(autharizationHeader)
+	if header == "" {
+		return nil
+	}
+	headerParts := strings.Split(header, " ")
+	if len(headerParts) != 2 {
+		return nil
+	}
+	userId, err := h.authService.ParseToken(headerParts[1])
+	if err != nil {
+		return nil
+	}
+	return userId
+}
+
 func (h *Handler) userIdentity(ctx *gin.Context) {
-	const op = "handler.signIn"
+	const op = "handler.userIdentity"
 	log := h.log.With("op", op)
 
 	header := ctx.GetHeader(autharizationHeader)

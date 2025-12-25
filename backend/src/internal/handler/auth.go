@@ -64,3 +64,21 @@ func (h *Handler) signIn(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"token": token})
 }
+
+// func (h *Handler) tokenValid(ctx *gin.Context) {
+// 	const op = "handler.tokenValid"
+// 	log := h.log.With("op", op)
+
+// 	token, isExist := ctx.Params.Get("token")
+// 	if !isExist {
+// 		ctx.Status(http.StatusBadRequest)
+// 	}
+// 	if _, err := h.authService.ParseToken(token); err != nil {
+// 		if !errors.Is(err, service.ErrInvalidToken) {
+// 			log.Error("failed parse token", utils.SlogErr(err))
+// 			ctx.JSON(http.StatusInternalServerError, false)
+// 		}
+// 		ctx.JSON(http.StatusOK, false)
+// 	}
+// 	ctx.JSON(http.StatusOK, true)
+// }

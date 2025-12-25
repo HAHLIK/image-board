@@ -4,7 +4,8 @@ export interface Post {
     title: string,
     content: string,
     author_name: string,
-    rating: number
+    rating: number,
+    user_vote: number
 }
 
 export interface Comment {
@@ -16,6 +17,10 @@ export interface Comment {
 
 export interface LoginResponse {
     token: string,
+}
+
+export interface TokenValidResponce {
+    valid: boolean,
 }
 
 export interface PostsResponse {

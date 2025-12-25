@@ -22,6 +22,7 @@ interface PostState {
 export const usePostsStore = create<PostState>((set, get) => ({
   offset: 0,
   limit: 2,
+  
   commentsLimit: 10,
   commentOffsetByPostId: {},
   isLoading: false,

@@ -19,6 +19,7 @@ type Post struct {
 	AuthorName string    `json:"author_name"`
 	Rating     int       `json:"rating"`
 	TimeStamp  time.Time `json:"timestamp"`
+	UserVote   int8      `json:"user_vote"`
 }
 
 type PostsBatchResponce struct {
