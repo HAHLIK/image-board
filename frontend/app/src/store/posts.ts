@@ -27,7 +27,7 @@ export const usePostsStore = create<PostState>((set, get) => ({
   offset: 0,
   limit: 2,
   
-  commentsLimit: 10,
+  commentsLimit: 4,
   isLoading: false,
   hasMore: true,
   posts: [],
@@ -74,18 +74,19 @@ export const usePostsStore = create<PostState>((set, get) => ({
   },
 
   getCommentsRequest: async (postId: number) => {
-  try {
-    const comments = { ...get().comments };
-    if (!comments[postId]) {
-      comments[postId] = {
-        offset: 0,
-        batch: [],
-        isLoading: false,
-        hasMore: true,
-      };
-    }
-    const postComments = comments[postId];
+    try {
+      const comments = { ...get().comments };
 
+      if (!comments[postId]) {
+        comments[postId] = {
+          offset: 0,
+          batch: [],
+          isLoading: false,
+          hasMore: true,
+        };
+      }
+
+    const postComments = comments[postId];
     if (postComments.isLoading || !postComments.hasMore) return;
 
     postComments.isLoading = true;
@@ -111,13 +112,21 @@ export const usePostsStore = create<PostState>((set, get) => ({
   }
 },
 
+
   createCommentRequest: async (postId: number, content: string) => {
-      try {
-        await PostService.createComment(content, postId);
-      } catch (e: any) {
-        console.error(e);
-      }
+  try {
+    await PostService.createComment(content, postId);
+
+    const comments = { ...get().comments };
+    delete comments[postId];
+    set({ comments });
+
+    await get().getCommentsRequest(postId);
+  } catch (e) {
+    console.error(e);
+  }
   },
+
 
   voteRequest: async (postId: number, value: number) => {
     try {
