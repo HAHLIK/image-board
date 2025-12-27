@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useUserStore } from '../../store/user';
 import './index.css';
 import MDEditor from '@uiw/react-md-editor';
+import CommentsWidget from '../CommentsWidget';
 
 type PostProps = {
+  id: number;
   timeStamp: string;
   title: string;
   content: string;
@@ -21,6 +23,7 @@ function truncateMarkdown(md: string, length: number): string {
 
 function PostWidget(props: PostProps) {
   const {
+    id,
     timeStamp,
     title,
     content,
@@ -39,8 +42,9 @@ function PostWidget(props: PostProps) {
     if (initialVote === 1) return 'up';
     if (initialVote === -1) return 'down';
     return 'none';
-});
+  });
   const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [commentsOpen, setCommentsOpen] = useState(false);
 
   const isLong = content.length > collapseThreshold;
   const contentToShow =
@@ -99,11 +103,9 @@ function PostWidget(props: PostProps) {
           <span className="authorName">{authorName}</span>
           <span className="timeText">{timeStamp}</span>
         </section>
-
         <section className="titleSection">
           <h2 className="title">{title}</h2>
         </section>
-
         <section
           className={`contentSection${
             isLong && collapsed ? ' contentSection--collapsed' : ''
@@ -119,18 +121,23 @@ function PostWidget(props: PostProps) {
             }}
           />
         </section>
-
         <section className="bottomActions">
-          {isLong ? (
+          <div>
+            {isLong && (
+              <button
+                className="toggleButton"
+                onClick={() => setCollapsed(!collapsed)}
+              >
+                {collapsed ? 'Показать полностью' : 'Свернуть'}
+              </button>
+            )}
             <button
               className="toggleButton"
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={() => setCommentsOpen(prev => !prev)}
             >
-              {collapsed ? 'Показать полностью' : 'Свернуть'}
+              {commentsOpen ? 'Скрыть комментарии' : 'Комментарии'}
             </button>
-          ) : (
-            <div />
-          )}
+          </div>
 
           <div className="ratingSection ratingSection--bottom">
             <button
@@ -156,12 +163,8 @@ function PostWidget(props: PostProps) {
             </button>
           </div>
         </section>
-
-        {authMessage && (
-          <div className="authMessage">
-            {authMessage}
-          </div>
-        )}
+        {authMessage && <div className="authMessage">{authMessage}</div>}
+        {commentsOpen && <CommentsWidget postId={id}/>}
       </div>
     </div>
   );

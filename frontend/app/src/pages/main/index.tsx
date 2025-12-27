@@ -77,6 +77,7 @@ export default function MainPage() {
                 {posts.map((post) => (
                   <PostWidget
                     key={post.id}
+                    id={post.id}
                     timeStamp={post.timestamp}
                     title={post.title}
                     content={post.content}

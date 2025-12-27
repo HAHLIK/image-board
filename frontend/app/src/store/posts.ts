@@ -1,19 +1,23 @@
 import { create } from "zustand";
-import type { Post } from "../models/models";
+import type { Post, Comment } from "../models/models";
 import { PostService } from "../services";
 
 interface PostState {
   offset: number;
   limit: number;
   commentsLimit: number;
-  commentOffsetByPostId: Record<number, number>
   posts: Post[];
+  comments: Record<number, {
+    offset: number;
+    batch: Comment[];
+    isLoading: boolean;
+    hasMore: boolean;
+  }>;
   isLoading: boolean;
   hasMore: boolean;
-  setPosts: (posts: Post[]) => void;
   getPostsRequest: () => Promise<void>;
   createPostRequest: (title: string, content: string) => Promise<void>;
-  getCommentsRequest: () => Promise<void>;
+  getCommentsRequest: (postId: number) => Promise<void>;
   createCommentRequest: (postId: number, content: string) => Promise<void>;
   voteRequest: (postId: number, value: number) => Promise<void>;
   deleteVoteRequest: (postId: number) => Promise<void>;
@@ -24,12 +28,10 @@ export const usePostsStore = create<PostState>((set, get) => ({
   limit: 2,
   
   commentsLimit: 10,
-  commentOffsetByPostId: {},
   isLoading: false,
   hasMore: true,
   posts: [],
-  setPosts: (posts: Post[]) => set({ posts }),
-
+  comments: {},
   getPostsRequest: async () => {
     if (get().isLoading || !get().hasMore) return;
 
@@ -71,9 +73,44 @@ export const usePostsStore = create<PostState>((set, get) => ({
     }
   },
 
-  getCommentsRequest: async () => {
-    
-  },
+  getCommentsRequest: async (postId: number) => {
+  try {
+    const comments = { ...get().comments };
+    if (!comments[postId]) {
+      comments[postId] = {
+        offset: 0,
+        batch: [],
+        isLoading: false,
+        hasMore: true,
+      };
+    }
+    const postComments = comments[postId];
+
+    if (postComments.isLoading || !postComments.hasMore) return;
+
+    postComments.isLoading = true;
+    set({ comments });
+
+    const limit = get().commentsLimit;
+    const response = await PostService.comments(
+      postComments.offset,
+      limit,
+      postId
+    );
+
+    const batch: Comment[] = response?.data?.batch ?? [];
+
+    postComments.batch.push(...batch);
+    postComments.offset += batch.length;
+    postComments.hasMore = batch.length === limit;
+    postComments.isLoading = false;
+
+    set({ comments: { ...comments } });
+  } catch (err) {
+    console.error("getCommentsRequest error:", err);
+  }
+},
+
   createCommentRequest: async (postId: number, content: string) => {
       try {
         await PostService.createComment(content, postId);
