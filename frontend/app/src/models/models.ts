@@ -5,7 +5,8 @@ export interface Post {
     content: string,
     author_name: string,
     rating: number,
-    user_vote: number
+    user_vote: number,
+    comments_count: number
 }
 
 export interface Comment {

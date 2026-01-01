@@ -10,6 +10,7 @@ type PostProps = {
   title: string;
   content: string;
   authorName: string;
+  commentsCount: number;
   collapseThreshold?: number;
   initialRating?: number;
   initialVote?: number;
@@ -28,6 +29,7 @@ function PostWidget(props: PostProps) {
     title,
     content,
     authorName,
+    commentsCount,
     collapseThreshold = 1000,
     initialRating = 0,
     initialVote = 0,
@@ -103,9 +105,11 @@ function PostWidget(props: PostProps) {
           <span className="authorName">{authorName}</span>
           <span className="timeText">{timeStamp}</span>
         </section>
+
         <section className="titleSection">
           <h2 className="title">{title}</h2>
         </section>
+
         <section
           className={`contentSection${
             isLong && collapsed ? ' contentSection--collapsed' : ''
@@ -121,24 +125,37 @@ function PostWidget(props: PostProps) {
             }}
           />
         </section>
+
         <section className="bottomActions">
           <div>
             {isLong && (
-              <button
-                className="toggleButton"
-                onClick={() => setCollapsed(!collapsed)}
-              >
-                {collapsed ? 'Показать полностью' : 'Свернуть'}
-              </button>
-            )}
             <button
               className="toggleButton"
-              onClick={() => setCommentsOpen(prev => !prev)}
+              onClick={() => setCollapsed(!collapsed)}
             >
-              {commentsOpen ? 'Скрыть комментарии' : 'Комментарии'}
+            {collapsed ? 'Показать полностью' : 'Свернуть'}
             </button>
+            )}
+            <button
+              className="toggleButton commentButton"
+              onClick={() => setCommentsOpen(prev => !prev)}
+              aria-label={commentsOpen ? 'Скрыть комментарии' : 'Комментарии'}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="rgba(255, 255, 255, 0.36)"
+                stroke="none"
+               >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                <rect x="7" y="7.5" width="11" height="1.6" fill="var(--bg-elevated)" />
+                <rect x="7" y="11.5" width="11" height="1.6" fill="var(--bg-elevated)" />
+              </svg>
+            <span className="commentsCount">{commentsCount}</span>
+          </button>
           </div>
-
           <div className="ratingSection ratingSection--bottom">
             <button
               className={`ratingButton ratingButton--up${
@@ -163,9 +180,14 @@ function PostWidget(props: PostProps) {
             </button>
           </div>
         </section>
+
         {authMessage && <div className="authMessage">{authMessage}</div>}
-        {commentsOpen && <CommentsWidget postId={id}/>}
       </div>
+      {commentsOpen && (
+        <div className="commentsWrapper">
+          <CommentsWidget postId={id} />
+        </div>
+      )}
     </div>
   );
 }

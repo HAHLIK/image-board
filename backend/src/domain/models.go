@@ -3,12 +3,13 @@ package models
 import "time"
 
 type Post struct {
-	Id        int64
-	Title     string
-	Content   string
-	AuthorId  []byte
-	Rating    int
-	TimeStamp time.Time
+	Id            int64
+	Title         string
+	Content       string
+	AuthorId      []byte
+	Rating        int
+	CommentsCount int
+	TimeStamp     time.Time
 }
 
 type Posts struct {

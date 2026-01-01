@@ -8,7 +8,7 @@
 }
 
 .headerContent {
-  max-width: 1300px;
+  max-width: 1100px;
   margin: 0 auto;
   min-height: 70px;
 }
@@ -17,7 +17,7 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
   height: 70px;
 }
 
@@ -35,6 +35,52 @@
   font-size: 0.95rem;
   font-weight: 600;
 }
+
+.createPostBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-color);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  text-decoration: none;
+  cursor: pointer;
+
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.plusIcon {
+  width: 20px;
+  height: 20px;
+  stroke: var(--text-primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transition: transform 0.4s ease;
+}
+
+.createPostBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+}
+
+.createPostBtn:hover .plusIcon {
+  transform: rotate(180deg);
+}
+
+.createPostBtn:active {
+  transform: translateY(0);
+  opacity: 0.85;
+}
+
+.createPostBtn:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 3px;
+}
+
 
 .primaryBtn {
   background: var(--primary-color);

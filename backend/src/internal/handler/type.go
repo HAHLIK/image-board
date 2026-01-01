@@ -13,13 +13,14 @@ type CreatePostRequest struct {
 }
 
 type Post struct {
-	Id         int64     `json:"id"`
-	Title      string    `json:"title"`
-	Content    string    `json:"content"`
-	AuthorName string    `json:"author_name"`
-	Rating     int       `json:"rating"`
-	TimeStamp  time.Time `json:"timestamp"`
-	UserVote   int8      `json:"user_vote"`
+	Id            int64     `json:"id"`
+	Title         string    `json:"title"`
+	Content       string    `json:"content"`
+	AuthorName    string    `json:"author_name"`
+	Rating        int       `json:"rating"`
+	TimeStamp     time.Time `json:"timestamp"`
+	UserVote      int8      `json:"user_vote"`
+	CommentsCount int       `json:"comments_count"`
 }
 
 type PostsBatchResponce struct {

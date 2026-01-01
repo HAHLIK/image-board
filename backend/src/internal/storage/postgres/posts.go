@@ -27,7 +27,7 @@ func (p *PostgresStorage) PostsBatch(ctx context.Context, offset int64, limit in
 		var post models.Post
 		if err := rows.Scan(
 			&post.Id, &post.Title, &post.Content,
-			&post.AuthorId, &post.Rating, &post.TimeStamp); err != nil {
+			&post.AuthorId, &post.Rating, &post.TimeStamp, &post.CommentsCount); err != nil {
 			return models.Posts{}, utils.ErrWrap(op, err)
 		}
 		batch.Posts = append(batch.Posts, &post)
@@ -126,10 +126,21 @@ const (
 	`
 
 	QueryPosts = `
-	SELECT p.id, p.title, p.content, p.author_id, COALESCE(SUM(v.value), 0) AS rating, p.time_stamp
+	SELECT p.id, p.title, p.content, p.author_id,
+     COALESCE(v.rating, 0) AS rating,
+     p.time_stamp,
+     COALESCE(c.comments_count, 0) AS comments_count
 	FROM posts p
-	LEFT JOIN votes v ON v.post_id = p.id
-	GROUP BY p.id, p.title, p.content, p.author_id, p.time_stamp
+	LEFT JOIN (
+     SELECT post_id, SUM(value) AS rating
+     FROM votes
+     GROUP BY post_id
+	) v ON v.post_id = p.id
+	LEFT JOIN (
+     SELECT post_id, COUNT(*) AS comments_count
+     FROM comments
+     GROUP BY post_id
+	) c ON c.post_id = p.id
 	ORDER BY p.id DESC
 	LIMIT $2 OFFSET $1;
 	`

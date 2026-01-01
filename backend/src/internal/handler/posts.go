@@ -46,12 +46,13 @@ func (h *Handler) posts(ctx *gin.Context) {
 			authorName = user.Name
 		}
 		postResponce := Post{
-			Id:         post.Id,
-			Title:      post.Title,
-			Content:    post.Content,
-			AuthorName: authorName,
-			Rating:     post.Rating,
-			TimeStamp:  post.TimeStamp,
+			Id:            post.Id,
+			Title:         post.Title,
+			Content:       post.Content,
+			AuthorName:    authorName,
+			Rating:        post.Rating,
+			TimeStamp:     post.TimeStamp,
+			CommentsCount: post.CommentsCount,
 		}
 		if len(userIdString) > 0 {
 			userVote, err := h.postsService.GetVote(ctx, []byte(userIdString), post.Id)

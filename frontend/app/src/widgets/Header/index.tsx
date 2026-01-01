@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
-import { Link } from 'react-router-dom';
-import AuthForm from '../../widgets/AuthForm'; // проверьте правильность импорта
+import AuthForm from '../../widgets/AuthForm';
 
 interface HeaderContentProps {
   isAuth: boolean;
@@ -40,9 +39,13 @@ const Header: React.FC<HeaderContentProps> = ({
                 src={avatarUrl}
               />
             )}
-            <Link to="/create-post" className="primaryBtn">
-              Создать пост
-            </Link>
+            <a href="/create-post" className="createPostBtn" aria-label="Создать пост">
+              <svg className="plusIcon" viewBox="0 0 24 24" aria-hidden="true">
+              <line x1="12" y1="4" x2="12" y2="20" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              </svg>
+            </a>
+
             <button className="primaryBtn" onClick={logout}>Выйти</button>
           </div>
         ) : isMobile ? (

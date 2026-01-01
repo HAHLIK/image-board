@@ -163,3 +163,20 @@
         padding: 0 0.625rem;
     }
 }
+
+.authForm input:-webkit-autofill,
+.authForm input:-webkit-autofill:hover,
+.authForm input:-webkit-autofill:focus,
+.authForm input:-webkit-autofill:active {
+    -webkit-box-shadow: 
+        0 0 0 1000px rgba(245, 245, 245, 0.007) inset,
+        0 0 0 2px rgba(99, 140, 71, 0.5) inset;
+    -webkit-text-fill-color: var(--text-primary);
+    caret-color: var(--text-primary);
+    transition: background-color 9999s ease-in-out 0s;
+}
+
+
+
+
+

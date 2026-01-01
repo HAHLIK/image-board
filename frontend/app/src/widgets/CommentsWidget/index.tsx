@@ -44,9 +44,9 @@ function CommentsWidget({ postId }: CommentsProps) {
       <div className="commentsList">
         {comments.map(comment => (
           <div key={comment.id} className="commentItem">
-            <div className="commentAvatar" />
             <div className="commentContent">
               <div className="commentHeader">
+                <div className="commentAvatar" />
                 <span className="commentAuthor">{comment.author_name}</span>
                 <span className="commentTime">{comment.timestamp}</span>
               </div>
