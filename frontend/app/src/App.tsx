@@ -5,11 +5,11 @@ import CreatePostPage from './pages/createPost';
 import { useUserStore } from './store/user';
 
 function App() {
-  const setIsAuth = useUserStore((state) => state.setIsAuth)
+  const checkAuth = useUserStore((state) => state.checkAuth)
 
   useEffect(() => {
-    setIsAuth();
-  }, [setIsAuth]);
+    checkAuth();
+  }, [checkAuth]);
 
   return (
     <Routes>

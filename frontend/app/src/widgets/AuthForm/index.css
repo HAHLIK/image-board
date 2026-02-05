@@ -2,13 +2,17 @@
     display: block;
 }
 
+.authForm, .authForm * {
+    box-sizing: border-box;
+}
+
 .authForm {
     position: sticky;
     top: 1rem;
-    display: grid;
-    justify-content: center;
-    min-height: 6.25rem;
-    width: 20rem;
+    display: block;
+    width: 18.5rem;
+    max-width: 100%;
+    min-width: 0;
     padding: 1.5rem 1.25rem;
     background: var(--bg-elevated);
     border-radius: 0.5rem;
@@ -83,6 +87,10 @@
     border-color: #f56565;
 }
 
+.authForm input {
+    padding-right: 2.6rem;
+}
+
 .authForm input:focus {
     outline: none;
     border-color: var(--primary-color);
@@ -97,6 +105,27 @@
 .authForm input:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.eye-icon {
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.15rem;
+    height: 1.15rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity .2s ease;
+}
+
+.eye-icon:hover {
+    opacity: 1;
 }
 
 .b1 {
@@ -141,15 +170,20 @@
 }
 
 .error-message {
+    width: 100%;
+    max-width: 100%;
+    display: block;
     color: #fc8181;
-    font-size: 0.8125rem;
-    font-weight: 500;
+    font-size: 0.7rem;
+    line-height: 1.25;
     margin: 0.5rem 0 0.75rem 0;
-    padding: 0.625rem 0.75rem;
+    padding: 0.45rem 0.5rem;
     background: rgba(245, 101, 101, 0.1);
     border: 1px solid rgba(245, 101, 101, 0.2);
     border-radius: 0.5rem;
     text-align: center;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 @media (max-width: 768px) {
@@ -159,6 +193,7 @@
         margin: 0 auto;
         padding: 1.25rem 0.9375rem;
     }
+
     .wrapper {
         padding: 0 0.625rem;
     }
@@ -175,8 +210,3 @@
     caret-color: var(--text-primary);
     transition: background-color 9999s ease-in-out 0s;
 }
-
-
-
-
-

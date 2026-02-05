@@ -7,7 +7,7 @@ import { usePostsStore } from "../../store/posts";
 import { useNavigate } from "react-router-dom";
 
 export default function CreatePostPage() {
-  const { isAuth, name, logout } = useUserStore();
+  const { isAuth } = useUserStore();
   const { createPostRequest } = usePostsStore();
   const navigate = useNavigate();
 
@@ -28,12 +28,7 @@ export default function CreatePostPage() {
 
   return (
     <div className="createPostPage">
-      <Header
-        isAuth={isAuth}
-        userName={name}
-        avatarUrl=''
-        logout={logout}
-      />
+      <Header/>
 
       <main className="createContent">
         <div className="createWrapper card fade-in">

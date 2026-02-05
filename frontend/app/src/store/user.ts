@@ -1,14 +1,20 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { AuthService } from "../services";
+import { AuthService, ProfileService } from "../services";
 
 interface UserState {
   isAuth: boolean;
   name: string;
+  avatar: {
+    original: string,
+    thumbnail: string,
+  };
   login: (name: string, password: string) => Promise<void>;
   registration: (name: string, password: string) => Promise<void>;
   logout: () => void;
-  setIsAuth: () => Promise<void>;
+  loadProfile: () => Promise<void>;
+  uploadAvatar: (file: File) => Promise<void>;
+  checkAuth: () => Promise<void>;
 }
 
 export const useUserStore = create<UserState>()(
@@ -16,42 +22,30 @@ export const useUserStore = create<UserState>()(
     (set) => ({
       isAuth: false,
       name: "",
+      avatar: {
+        original: "",
+        thumbnail: ""
+      },
 
       login: async (name: string, password: string) => {
-        try {
-          const response = await AuthService.login(name, password);
+        const response = await AuthService.login(name, password);
 
-          localStorage.setItem("token", response.data.token);
+        localStorage.setItem("token", response.data.token);
 
-          set({
-            isAuth: true,
-            name,
-          });
-          window.location.reload();
+        set({ isAuth: true });
 
-        } catch (e: any) {
-          console.error(e.response?.data?.message);
-          throw e;
-        }
+        await useUserStore.getState().loadProfile();
       },
 
       registration: async (name: string, password: string) => {
-        try {
-          await AuthService.registration(name, password);
-          const response = await AuthService.login(name, password);
+        await AuthService.registration(name, password);
+        const response = await AuthService.login(name, password);
 
-          localStorage.setItem("token", response.data.token);
+        localStorage.setItem("token", response.data.token);
 
-          set({
-            isAuth: true,
-            name,
-          });
-          window.location.reload();
+        set({ isAuth: true });
 
-        } catch (e: any) {
-          console.error(e.response?.data?.message);
-          throw e;
-        }
+        await useUserStore.getState().loadProfile();
       },
 
       logout: () => {
@@ -60,25 +54,50 @@ export const useUserStore = create<UserState>()(
         set({
           isAuth: false,
           name: "",
+          avatar: {
+            original: "",
+            thumbnail: ""
+          },
         });
-        window.location.reload();
       },
 
-      setIsAuth: async () => {
+      loadProfile: async () => {
+        try {
+          const profile = await ProfileService.getProfile(); 
+          console.log(profile.data.name)
+          set({
+            name: profile.data.name,
+            avatar: profile.data.avatar,
+          });
+        } catch (e) {
+          console.error("can't get profile", e);
+        }
+      },
+
+      uploadAvatar: async (file: File) => {
+        const response = await ProfileService.uploadAvatar(file);
+        set({
+          avatar: response.data.avatarPath
+        });
+      },
+
+
+      checkAuth: async () => {
         try {
           const response = await AuthService.tokenIsValid();
 
-          set({
-            isAuth: response.data.valid,
-          });
-        } catch (e: any) {
-          console.error(e.response?.data?.message);
+          set({ isAuth: response.data.valid });
 
+          if (response.data.valid) {
+            await useUserStore.getState().loadProfile();
+          } else {
+            localStorage.removeItem("token");
+            set({ isAuth: false, name: "",  avatar: {original: "", thumbnail: ""} });
+          }
+        } catch (e) {
+          console.error("token is not valid", e);
           localStorage.removeItem("token");
-          set({
-            isAuth: false,
-            name: "",
-          });
+          set({ isAuth: false, name: "",  avatar: {original: "", thumbnail: ""} });
         }
       },
     }),
@@ -87,6 +106,7 @@ export const useUserStore = create<UserState>()(
       partialize: (state) => ({
         isAuth: state.isAuth,
         name: state.name,
+        avatar: state.avatar,
       }),
     }
   )

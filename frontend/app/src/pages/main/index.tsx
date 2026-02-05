@@ -20,9 +20,7 @@ export default function MainPage() {
     else voteRequest(postId, value)
   }
 
-  const name = useUserStore(state => state.name);
   const isAuth = useUserStore(state => state.isAuth);
-  const logout = useUserStore(state => state.logout);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -58,12 +56,7 @@ export default function MainPage() {
 
   return (
     <div className="mainPage">
-      <Header
-        isAuth={isAuth}
-        userName={name}
-        avatarUrl=""
-        logout={logout}
-      />
+      <Header/>
 
       <main className="mainContent">
         <div className="contentWrapper">
@@ -81,7 +74,7 @@ export default function MainPage() {
                     timeStamp={post.timestamp}
                     title={post.title}
                     content={post.content}
-                    authorName={post.author_name}
+                    author={post.author}
                     commentsCount={post.comments_count}
                     initialRating={post.rating}
                     initialVote={post.user_vote}

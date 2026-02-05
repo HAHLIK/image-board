@@ -8,10 +8,10 @@ import (
 )
 
 type Config struct {
-	Env            string        `yaml:"env" env-default:"local"`
-	ImageboardPort int           `yaml:"imageboard_port" env-required:"true"`
-	PostgresURL    string        `yaml:"main_storage_url" env-required:"true"`
-	AuthTokenTTL   time.Duration `yaml:"auth_token_ttl" env-required:"true"`
+	Env          string        `yaml:"env" env-default:"local"`
+	HTTPPort     int           `yaml:"http_port" env-required:"true"`
+	PostgresURL  string        `yaml:"main_storage_url" env-required:"true"`
+	AuthTokenTTL time.Duration `yaml:"auth_token_ttl" env-required:"true"`
 }
 
 func MustLoad(path string) *Config {

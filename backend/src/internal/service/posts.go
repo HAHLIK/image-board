@@ -9,11 +9,11 @@ import (
 )
 
 type PostsService struct {
-	Provider Provider
+	Provider PostProvider
 	Log      *slog.Logger
 }
 
-type Provider interface {
+type PostProvider interface {
 	PostsBatch(ctx context.Context, offset int64, limit int64) (posts models.Posts, err error)
 	SavePost(ctx context.Context, post *models.Post) (id int64, err error)
 	CommentsBatch(ctx context.Context, postID int64, offset int64, limit int64) (commets models.Comments, err error)

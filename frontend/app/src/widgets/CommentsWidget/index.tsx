@@ -47,7 +47,7 @@ function CommentsWidget({ postId }: CommentsProps) {
             <div className="commentContent">
               <div className="commentHeader">
                 <div className="commentAvatar" />
-                <span className="commentAuthor">{comment.author_name}</span>
+                <span className="commentAuthor">{comment.author.name}</span>
                 <span className="commentTime">{comment.timestamp}</span>
               </div>
               <div className="commentText">{comment.content}</div>
@@ -55,6 +55,7 @@ function CommentsWidget({ postId }: CommentsProps) {
           </div>
         ))}
       </div>
+
       {hasMore && (
         <button
           className="loadMoreComments small"

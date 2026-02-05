@@ -17,9 +17,15 @@ type Posts struct {
 }
 
 type User struct {
-	Id       []byte
-	Name     string
-	PassHash []byte
+	Id         []byte
+	Name       string
+	PassHash   []byte
+	AvatarPath AvatarPath
+}
+
+type AvatarPath struct {
+	Original  string
+	Thumbnail string
 }
 
 type Comment struct {

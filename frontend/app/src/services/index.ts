@@ -1,6 +1,6 @@
 import {$api, $auth} from "../http";
 import type { AxiosResponse } from "axios";
-import type { LoginResponse, PostsResponse, CommentsResponse, TokenValidResponce} from "../models/models";
+import type { LoginResponse, PostsResponse, CommentsResponse, TokenValidResponce, Profile} from "../models/models";
 
 export class AuthService {
     static async login(name: string, password: string): Promise<AxiosResponse<LoginResponse>> {
@@ -65,4 +65,21 @@ export class PostService {
     static async deleteVote(postId: number): Promise<AxiosResponse> {
         return await $api.delete(`/posts/${postId}/vote`)
     }
+}
+
+export class ProfileService {
+    static async getProfile(): Promise<AxiosResponse<Profile>> {
+        return await $api.get(`/profile`)
+    }
+
+    static async uploadAvatar(file: File): Promise<AxiosResponse> {
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        return await $api.post(`/profile/avatar`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+}
 }

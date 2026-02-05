@@ -33,7 +33,6 @@ const MarkdownEditorWidget: React.FC<MarkdownEditorWidgetProps> = ({
           commands.strikethrough,
           commands.hr,
           commands.divider,
-          commands.title1,
           commands.title2,
           commands.link,
           commands.quote,

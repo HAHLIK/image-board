@@ -7,6 +7,7 @@ import (
 
 	models "github.com/HAHLIK/image-board/domain"
 	"github.com/HAHLIK/image-board/internal/service"
+	"github.com/HAHLIK/image-board/internal/storage"
 	"github.com/HAHLIK/image-board/utils"
 
 	"github.com/gin-gonic/gin"
@@ -40,16 +41,23 @@ func (h *Handler) posts(ctx *gin.Context) {
 
 	responce := PostsBatchResponce{Batch: make([]*Post, 0)}
 	for _, post := range posts.Posts {
-		user, err := h.authService.User(ctx, post.AuthorId)
-		var authorName string
-		if err == nil {
-			authorName = user.Name
+		author, err := h.authService.User(ctx, post.AuthorId)
+		if err != nil {
+			if !errors.Is(err, storage.ErrIsNotExist) {
+				log.Error("can't get user")
+			}
 		}
 		postResponce := Post{
-			Id:            post.Id,
-			Title:         post.Title,
-			Content:       post.Content,
-			AuthorName:    authorName,
+			Id:      post.Id,
+			Title:   post.Title,
+			Content: post.Content,
+			Author: User{
+				Name: author.Name,
+				AvatarPath: Avatar{
+					Original:  author.AvatarPath.Original,
+					Thumbnail: author.AvatarPath.Thumbnail,
+				},
+			},
 			Rating:        post.Rating,
 			TimeStamp:     post.TimeStamp,
 			CommentsCount: post.CommentsCount,
@@ -127,16 +135,23 @@ func (h *Handler) comments(ctx *gin.Context) {
 
 	responce := CommentsBatchResponce{Batch: make([]*Comment, 0)}
 	for _, comment := range comments.Comments {
-		user, err := h.authService.User(ctx, comment.AuthorId)
-		var authorName string
-		if err == nil {
-			authorName = user.Name
+		author, err := h.authService.User(ctx, comment.AuthorId)
+		if err != nil {
+			if !errors.Is(err, storage.ErrIsNotExist) {
+				log.Error("can't get user")
+			}
 		}
 		commentResponce := Comment{
-			Id:         comment.Id,
-			Content:    comment.Content,
-			AuthorName: authorName,
-			TimeStamp:  comment.TimeStamp,
+			Id:      comment.Id,
+			Content: comment.Content,
+			Author: User{
+				Name: author.Name,
+				AvatarPath: Avatar{
+					Original:  author.AvatarPath.Original,
+					Thumbnail: author.AvatarPath.Thumbnail,
+				},
+			},
+			TimeStamp: comment.TimeStamp,
 		}
 		responce.Batch = append(responce.Batch, &commentResponce)
 	}

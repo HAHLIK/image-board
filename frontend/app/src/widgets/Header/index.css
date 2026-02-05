@@ -11,6 +11,10 @@
   max-width: 1100px;
   margin: 0 auto;
   min-height: 70px;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .profileHeader {
@@ -22,12 +26,19 @@
 }
 
 .profileAvatar {
-  width: 50px;
-  height: 50px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid var(--border-color);
   user-select: none;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.profileAvatar:hover {
+  box-shadow: 0 0 0 2px var(--primary-color), 0 4px 12px rgba(0,0,0,0.2);
+  transform: translateY(-2px);
 }
 
 .profileName {
@@ -37,18 +48,15 @@
 }
 
 .createPostBtn {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   background: var(--primary-color);
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   text-decoration: none;
   cursor: pointer;
-
   transition: transform 0.4s ease, box-shadow 0.4s ease;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
@@ -71,17 +79,6 @@
   transform: rotate(180deg);
 }
 
-.createPostBtn:active {
-  transform: translateY(0);
-  opacity: 0.85;
-}
-
-.createPostBtn:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 3px;
-}
-
-
 .primaryBtn {
   background: var(--primary-color);
   border-radius: 12px;
@@ -90,74 +87,151 @@
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+  border: none;
+}
+
+.primaryBtn:hover {
+  background: var(--primary-color);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+  transform: translateY(-2px);
 }
 
 .primaryBtn:active {
-  opacity: 0.7;
-}
-
-.primaryBtn::before{
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.5s;
-}
-
-.primaryBtn:hover::before{
-  left: 100%;
-}
-
-.primaryBtn:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.primaryBtn:active, a:active{
+  opacity: 0.85;
   transform: translateY(0);
 }
 
-.primaryBtn:focus-visible, a:focus-visible{
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
-}
 
 .authModal {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
   z-index: 1000;
-  width: 100vw;
-  height: 100vh;
   background: rgba(0,0,0,0.35);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.closeBtn {
+.authFormWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.authCloseBtn {
   position: absolute;
-  top: 1.1rem;
-  right: 1.2rem;
+  top: 8px;
+  right: 10px;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.6rem;
+  line-height: 1;
+  border: none;
+  border-radius: 50%;
   background: var(--bg-elevated);
-  border: 0;
-  border-radius: 10%;
-  font-size: 0.8rem;
+  color: var(--text-primary);
   cursor: pointer;
+  opacity: 0.75;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease, opacity 0.25s ease, text-shadow 0.25s ease;
+  z-index: 1050;
+}
+
+.avatarModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.avatarModalContent {
+  background: var(--bg-elevated);
+  padding: 1.3rem;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  position: relative;
+
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+}
+
+.avatarCloseBtn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 2rem;
+  line-height: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  opacity: 0.75;
+  transition: all 0.25s ease;
+}
+
+.avatarCloseBtn:hover {
+  opacity: 1;
+  transform: scale(1.2) rotate(180deg);
+  text-shadow: 0 0 6px rgba(255,255,255,0.6);
+}
+
+.avatarLarge {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary-color);
+}
+
+.avatarLarge.uploading {
+  filter: blur(6px) brightness(0.9);
+  transition: filter 0.3s ease;
+}
+
+.avatarModalContent.zoomIn {
+  animation: zoomIn 0.25s ease;
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.avatarModalContent.dragOver {
+  border: 2px dashed var(--primary-color);
+}
+
+.dragHint {
+  margin-top: 0.3rem;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+.uploadHint {
+  margin-top: 0.3rem;
+  opacity: 0.85;
+  font-size: 0.9rem;
+  color: var(--primary-color);
+}
+
+.uploadError {
+  margin-top: 12px;
+  color: #ff4d4f;
+  font-size: 14px;
+  text-align: center;
 }
 
 @media (max-width: 768px) {
-  .headerContent {
-    padding: 0 1rem;
-  }
-  
-  .profileHeader {
-    flex-wrap: wrap;
-    padding-right: 1rem;
+  .avatarLarge {
+    width: 200px;
+    height: 200px;
   }
 }

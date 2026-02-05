@@ -1,9 +1,14 @@
 .commentsSection {
-  padding: 12px 16px 16px;
+  width: 100%;
+  max-width: 50rem;
+  margin: 1rem auto 0 auto;
+  padding: 12px 10px 10px;
   background: var(--bg-elevated);
-  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1);
-  border-top: 1px solid var(--border-color);
   border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
 .commentsHeader {
@@ -31,11 +36,12 @@
   min-height: 70px;
   resize: vertical;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 0.5rem;
   border: 1px solid var(--border-color);
   background: var(--bg-elevated);
   color: var(--text-primary);
   font-size: 0.88rem;
+  box-sizing: border-box;
 }
 
 .commentInput::placeholder {
@@ -50,7 +56,7 @@
 
 .commentSubmit {
   padding: 6px 14px;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   border: 1px solid var(--border-color);
   background: var(--bg-elevated);
   color: var(--text-primary);
@@ -67,7 +73,7 @@
 .commentsList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   margin-top: 12px;
 }
 
@@ -76,7 +82,7 @@
   gap: 12px;
   padding: 12px 14px;
   background: rgba(53, 49, 97, 0.08);
-  border-radius: 10px;
+  border-radius: 0.5rem;
   border: 1px solid var(--border-color);
   font-size: 0.88rem;
   line-height: 1.4;
@@ -129,9 +135,9 @@
 
 .loadMoreComments {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 12px;
   padding: 8px;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   border: 1px solid var(--border-color);
   background: transparent;
   color: var(--text-secondary);
@@ -145,16 +151,13 @@
 }
 
 .commentAuthHint {
-  margin-top: 10px;
+  margin-top: 12px;
   font-size: 0.85rem;
   color: var(--text-muted);
+  text-align: center;
 }
 
 @media (max-width: 768px) {
-  .commentsSection {
-    padding: 12px 8px ;
-  }
-
   .commentContent {
     gap: 8px;
   }
@@ -174,5 +177,10 @@
 
   .commentText {
     font-size: 0.82rem;
+  }
+
+  .loadMoreComments {
+    font-size: 0.82rem;
+    padding: 6px;
   }
 }

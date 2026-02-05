@@ -3,13 +3,16 @@ import { useUserStore } from '../../store/user';
 import './index.css';
 import MDEditor from '@uiw/react-md-editor';
 import CommentsWidget from '../CommentsWidget';
+import type { Profile } from '../../models/models';
+
+import defaultAvatar from '../../../assets/icons/default_avatar.png';
 
 type PostProps = {
   id: number;
   timeStamp: string;
   title: string;
-  content: string;
-  authorName: string;
+  content?: string | null;
+  author: Profile;
   commentsCount: number;
   collapseThreshold?: number;
   initialRating?: number;
@@ -28,7 +31,7 @@ function PostWidget(props: PostProps) {
     timeStamp,
     title,
     content,
-    authorName,
+    author,
     commentsCount,
     collapseThreshold = 1000,
     initialRating = 0,
@@ -37,6 +40,8 @@ function PostWidget(props: PostProps) {
   } = props;
 
   const isAuth = useUserStore(state => state.isAuth);
+
+  const safeContent = content ?? '';
 
   const [collapsed, setCollapsed] = useState(true);
   const [rating, setRating] = useState(initialRating);
@@ -48,11 +53,12 @@ function PostWidget(props: PostProps) {
   const [authMessage, setAuthMessage] = useState<string | null>(null);
   const [commentsOpen, setCommentsOpen] = useState(false);
 
-  const isLong = content.length > collapseThreshold;
+  const isLong = safeContent.length > collapseThreshold;
+
   const contentToShow =
     isLong && collapsed
-      ? truncateMarkdown(content, collapseThreshold)
-      : content;
+      ? truncateMarkdown(safeContent, collapseThreshold)
+      : safeContent;
 
   const showAuthMessage = () => {
     setAuthMessage('Войдите или зарегистрируйтесь, чтобы голосовать');
@@ -98,11 +104,24 @@ function PostWidget(props: PostProps) {
     }
   };
 
+  const authorAvatar =
+    author.avatar?.thumbnail?.trim()
+      ? author.avatar.thumbnail
+      : defaultAvatar;
+
   return (
     <div className="postWidget">
       <div className="mainBlock">
         <section className="headerSection">
-          <span className="authorName">{authorName}</span>
+          <div className="authorBlock">
+            <img
+              className="authorAvatar"
+              src={authorAvatar}
+              alt={`Аватар ${author.name}`}
+              loading="lazy"
+            />
+            <span className="authorName">{author.name}</span>
+          </div>
           <span className="timeText">{timeStamp}</span>
         </section>
 
@@ -115,27 +134,33 @@ function PostWidget(props: PostProps) {
             isLong && collapsed ? ' contentSection--collapsed' : ''
           }`}
         >
-          <MDEditor.Markdown
-            source={contentToShow}
-            style={{
-              backgroundColor: 'transparent',
-              color: 'var(--text-secondary)',
-              fontWeight: 400,
-              lineHeight: 1.6,
-            }}
-          />
+          {safeContent ? (
+            <MDEditor.Markdown
+              className="myMarkDownPreview"
+              source={contentToShow}
+              style={{
+                backgroundColor: 'transparent',
+                color: 'var(--text-secondary)',
+                fontWeight: 400,
+                lineHeight: 1.6,
+              }}
+            />
+          ) : (
+            <div className="emptyContent">Нет содержимого</div>
+          )}
         </section>
 
         <section className="bottomActions">
           <div>
             {isLong && (
-            <button
-              className="toggleButton"
-              onClick={() => setCollapsed(!collapsed)}
-            >
-            {collapsed ? 'Показать полностью' : 'Свернуть'}
-            </button>
+              <button
+                className="toggleButton"
+                onClick={() => setCollapsed(!collapsed)}
+              >
+                {collapsed ? 'Показать полностью' : 'Свернуть'}
+              </button>
             )}
+
             <button
               className="toggleButton commentButton"
               onClick={() => setCommentsOpen(prev => !prev)}
@@ -147,24 +172,23 @@ function PostWidget(props: PostProps) {
                 height="24"
                 viewBox="0 0 24 24"
                 fill="rgba(255, 255, 255, 0.36)"
-                stroke="none"
-               >
+              >
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 <rect x="7" y="7.5" width="11" height="1.6" fill="var(--bg-elevated)" />
                 <rect x="7" y="11.5" width="11" height="1.6" fill="var(--bg-elevated)" />
               </svg>
-            <span className="commentsCount">{commentsCount}</span>
-          </button>
+              <span className="commentsCount">{commentsCount}</span>
+            </button>
           </div>
+
           <div className="ratingSection ratingSection--bottom">
             <button
               className={`ratingButton ratingButton--up${
                 vote === 'up' ? ' ratingButton--voted' : ''
               }`}
               onClick={handleUpvote}
-              aria-label="Плюсануть"
             >
-              <span className="ratingArrow">▲</span>
+              ▲
             </button>
 
             <span className="ratingValue">{rating}</span>
@@ -174,20 +198,16 @@ function PostWidget(props: PostProps) {
                 vote === 'down' ? ' ratingButton--voted' : ''
               }`}
               onClick={handleDownvote}
-              aria-label="Заминусить"
             >
-              <span className="ratingArrow">▼</span>
+              ▼
             </button>
           </div>
         </section>
 
         {authMessage && <div className="authMessage">{authMessage}</div>}
       </div>
-      {commentsOpen && (
-        <div className="commentsWrapper">
-          <CommentsWidget postId={id} />
-        </div>
-      )}
+
+      {commentsOpen && <CommentsWidget postId={id} />}
     </div>
   );
 }

@@ -9,12 +9,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (p *PostgresStorage) PostsBatch(ctx context.Context, offset int64, limit int64) (models.Posts, error) {
+func (s *Storage) PostsBatch(ctx context.Context, offset int64, limit int64) (models.Posts, error) {
 	const op = "postgres.GetPostsBatch"
 
 	batch := models.Posts{Posts: make([]*models.Post, 0)}
 
-	rows, err := p.db.Query(ctx, QueryPosts, offset, limit)
+	rows, err := s.db.Query(ctx, QueryPosts, offset, limit)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return models.Posts{}, nil
@@ -35,19 +35,19 @@ func (p *PostgresStorage) PostsBatch(ctx context.Context, offset int64, limit in
 	return batch, nil
 }
 
-func (p *PostgresStorage) SavePost(ctx context.Context, post *models.Post) (int64, error) {
+func (s *Storage) SavePost(ctx context.Context, post *models.Post) (int64, error) {
 	const op = "postgres.SavePost"
 
 	var id int64
 
-	if err := p.db.QueryRow(ctx, QuerySavePost, post.Title,
+	if err := s.db.QueryRow(ctx, QuerySavePost, post.Title,
 		post.Content, post.AuthorId).Scan(&id); err != nil {
 		return -1, utils.ErrWrap(op, err)
 	}
 	return id, nil
 }
 
-func (p *PostgresStorage) CommentsBatch(
+func (s *Storage) CommentsBatch(
 	ctx context.Context, postID int64, offset int64, limit int64) (
 	commets models.Comments, err error) {
 
@@ -55,7 +55,7 @@ func (p *PostgresStorage) CommentsBatch(
 
 	batch := models.Comments{Comments: make([]*models.Comment, 0)}
 
-	rows, err := p.db.Query(ctx, QueryComments, postID, offset, limit)
+	rows, err := s.db.Query(ctx, QueryComments, postID, offset, limit)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return models.Comments{}, nil
@@ -76,40 +76,40 @@ func (p *PostgresStorage) CommentsBatch(
 	return batch, nil
 }
 
-func (p *PostgresStorage) SaveComment(ctx context.Context, comment *models.Comment) (int64, error) {
+func (s *Storage) SaveComment(ctx context.Context, comment *models.Comment) (int64, error) {
 	const op = "postgres.SaveComment"
 
 	var id int64
 
-	if err := p.db.QueryRow(ctx, QuerySaveComment, comment.PostId,
+	if err := s.db.QueryRow(ctx, QuerySaveComment, comment.PostId,
 		comment.AuthorId, comment.Content).Scan(&id); err != nil {
 		return -1, utils.ErrWrap(op, err)
 	}
 	return id, nil
 }
 
-func (p *PostgresStorage) Vote(ctx context.Context, vote models.Vote) error {
+func (s *Storage) Vote(ctx context.Context, vote models.Vote) error {
 	const op = "postgres.Vote"
 
-	if _, err := p.db.Exec(ctx, QueryVote, vote.PostId, vote.AuthorId, vote.Value); err != nil {
+	if _, err := s.db.Exec(ctx, QueryVote, vote.PostId, vote.AuthorId, vote.Value); err != nil {
 		return utils.ErrWrap(op, err)
 	}
 	return nil
 }
 
-func (p *PostgresStorage) DeleteVote(ctx context.Context, vote models.Vote) error {
+func (s *Storage) DeleteVote(ctx context.Context, vote models.Vote) error {
 	const op = "postgres.DeleteVote"
 
-	if _, err := p.db.Exec(ctx, QueryDeleteVote, vote.PostId, vote.AuthorId); err != nil {
+	if _, err := s.db.Exec(ctx, QueryDeleteVote, vote.PostId, vote.AuthorId); err != nil {
 		return utils.ErrWrap(op, err)
 	}
 	return nil
 }
 
-func (p *PostgresStorage) GetVote(ctx context.Context, authorId []byte, postId int64) (vote models.Vote, err error) {
+func (s *Storage) GetVote(ctx context.Context, authorId []byte, postId int64) (vote models.Vote, err error) {
 	const op = "postgres.GetVote"
 
-	if err = p.db.QueryRow(ctx, QueryGetVote, postId, authorId).Scan(&vote.PostId, &vote.AuthorId, &vote.Value); err != nil {
+	if err = s.db.QueryRow(ctx, QueryGetVote, postId, authorId).Scan(&vote.PostId, &vote.AuthorId, &vote.Value); err != nil {
 		if !errors.Is(err, pgx.ErrNoRows) {
 			return models.Vote{}, utils.ErrWrap(op, err)
 		}

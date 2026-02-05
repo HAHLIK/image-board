@@ -12,18 +12,35 @@ import (
 	"github.com/HAHLIK/image-board/internal/handler"
 	"github.com/HAHLIK/image-board/internal/service"
 	"github.com/HAHLIK/image-board/internal/storage/postgres"
+	"github.com/HAHLIK/image-board/internal/storage/s3storage"
 	"github.com/HAHLIK/image-board/utils"
-	flagparser "github.com/HAHLIK/image-board/utils/flagParser"
+	"github.com/HAHLIK/image-board/utils/flagandenv"
 )
 
 func main() {
 	//Config and logger
-	parser := flagparser.New()
+	getter := flagandenv.EnvGetter{}
 
-	authJWTSecret := parser.String("auth-jwt-secret", "", "secret for auth jwt")
+	authJWTSecret := getter.Get("AUTH_JWT_SECRET")
+
+	pgsUser := getter.Get("POSTGRES_USER")
+	pgsPassword := getter.Get("POSTGRES_PASSWORD")
+	pgsDBName := getter.Get("POSTGRES_DB_NAME")
+
+	s3Endpoint := getter.Get("S3_ENDPOINT_URL")
+	s3Region := getter.Get("S3_REGION")
+	s3Bucket := getter.Get("S3_BUCKET")
+	s3AccessKey := getter.Get("S3_ACCESS_KEY")
+	s3SecretKey := getter.Get("S3_SECRET_KEY")
+	s3PublicBase := getter.Get("S3_PUBLIC_BASE")
+
+	if err := getter.EmptiesValues(); err != nil {
+		panic(err)
+	}
+
+	parser := flagandenv.NewFlagParser()
+
 	cfgPath := parser.String("cfg-path", "", "path to config file")
-	pgsUser := parser.String("pgs-user", "", "name postgres user")
-	pgsPassword := parser.String("pgs-pass", "", "postgres password")
 
 	if err := parser.Parse(); err != nil {
 		panic(err)
@@ -33,14 +50,21 @@ func main() {
 	log := utils.SetupLoger(cfg.Env)
 	ctx := context.Background()
 
-	//Storage
-	postgresStorage := postgres.PostgresStorage{}
-	postgresStorage.MustConnect(ctx, cfg.PostgresURL, *pgsUser, *pgsPassword)
+	//Postgres Storage
+	postgresStorage := postgres.Storage{}
+	postgresStorage.MustConnect(ctx, cfg.PostgresURL, pgsUser, pgsPassword, pgsDBName)
 
 	defer postgresStorage.Stop(ctx)
 
 	if err := postgresStorage.Init(ctx); err != nil {
-		log.Warn(err.Error())
+		log.Error("postgres init error", utils.SlogErr(err))
+		panic(err)
+	}
+
+	//S3 Storage
+	s3Storage, err := s3storage.New(ctx, s3Endpoint, s3Region, s3Bucket, s3AccessKey, s3SecretKey, s3PublicBase)
+	if err != nil {
+		log.Error("s3 init error", utils.SlogErr(err))
 	}
 
 	//Services
@@ -53,7 +77,12 @@ func main() {
 		UserProvider: &postgresStorage,
 		TokenTTL:     cfg.AuthTokenTTL,
 		Log:          log,
-		Secret:       []byte(*authJWTSecret),
+		Secret:       []byte(authJWTSecret),
+	}
+
+	imageService := &service.ImageService{
+		Log:      log,
+		Provider: s3Storage,
 	}
 
 	//Handler
@@ -61,6 +90,7 @@ func main() {
 		log,
 		authService,
 		postsService,
+		imageService,
 	)
 	handler.Init()
 
@@ -68,7 +98,7 @@ func main() {
 	application := app.New(
 		handler,
 		log,
-		cfg.ImageboardPort,
+		cfg.HTTPPort,
 	)
 	go application.MustRun()
 

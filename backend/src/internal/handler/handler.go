@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"net/http"
+	"mime/multipart"
 
 	models "github.com/HAHLIK/image-board/domain"
 	"github.com/HAHLIK/image-board/utils"
@@ -20,6 +20,7 @@ type Handler struct {
 	router       *gin.Engine
 	authService  AuthService
 	postsService PostsService
+	imageService ImageService
 	initStatus   bool
 }
 
@@ -27,6 +28,7 @@ type AuthService interface {
 	SignUp(ctx context.Context, name string, password string) (id []byte, err error)
 	SignIn(ctx context.Context, name string, password string) (token string, err error)
 	User(ctx context.Context, id []byte) (user models.User, err error)
+	UpdateUser(ctx context.Context, user models.User) error
 	ParseToken(token string) (userId []byte, err error)
 }
 
@@ -40,41 +42,47 @@ type PostsService interface {
 	GetVote(ctx context.Context, authorId []byte, postId int64) (vote models.Vote, err error)
 }
 
-func New(log *slog.Logger, authService AuthService, postsService PostsService) *Handler {
+type ImageService interface {
+	UploadAvatar(ctx context.Context, userId []byte, fileHeader *multipart.FileHeader) (avatarPath models.AvatarPath, err error)
+}
+
+func New(log *slog.Logger, authService AuthService, postsService PostsService, imageService ImageService) *Handler {
 	return &Handler{
 		log:          log,
 		router:       gin.New(),
 		authService:  authService,
 		postsService: postsService,
+		imageService: imageService,
 	}
 }
 
 func (h *Handler) Init() {
-	posts := h.router.Group("/api/posts")
+	api := h.router.Group("/api")
 	{
-		posts.GET("", h.userIdentityWithoutAbort, h.posts)
-		posts.POST("", h.userIdentity, h.savePost)
-
-		ac := posts.Group("/:post_id")
+		posts := api.Group("/posts")
 		{
-			ac.PUT("/vote", h.userIdentity, h.vote)
-			ac.DELETE("/vote", h.userIdentity, h.deleteVote)
+			posts.GET("", h.userIdentityWithoutAbort, h.posts)
+			posts.POST("", h.userIdentity, h.savePost)
 
-			ac.GET("/comments", h.comments)
-			ac.POST("/comments", h.userIdentity, h.saveComment)
+			ac := posts.Group("/:post_id")
+			{
+				ac.PUT("/vote", h.userIdentity, h.vote)
+				ac.DELETE("/vote", h.userIdentity, h.deleteVote)
+
+				ac.GET("/comments", h.comments)
+				ac.POST("/comments", h.userIdentity, h.saveComment)
+			}
+		}
+		user := api.Group("/profile")
+		{
+			user.GET("", h.userIdentity, h.profile)
+			user.POST("/avatar", h.userIdentity, h.uploadAvatar)
 		}
 	}
 
 	a := h.router.Group("/auth")
 	{
-		a.GET("/token-valid", func(ctx *gin.Context) {
-			userId := h._userIdentityWithoutAbort(ctx)
-			if userId != nil {
-				ctx.IndentedJSON(http.StatusOK, gin.H{"valid": true})
-				return
-			}
-			ctx.IndentedJSON(http.StatusOK, gin.H{"valid": false})
-		})
+		a.GET("/token-valid", h.tokenValid)
 		a.POST("/sign-up", h.signUp)
 		a.POST("/sign-in", h.signIn)
 	}

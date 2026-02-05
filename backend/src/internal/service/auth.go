@@ -31,6 +31,7 @@ type UserProvider interface {
 	User(ctx context.Context, id []byte) (user models.User, err error)
 	UserByName(ctx context.Context, name string) (user models.User, err error)
 	SaveUser(ctx context.Context, name string, passhash []byte) (id []byte, err error)
+	UpdateUser(ctx context.Context, user models.User) error
 }
 
 func (a *AuthService) SignUp(ctx context.Context, name string, password string) ([]byte, error) {
@@ -110,6 +111,19 @@ func (a *AuthService) User(ctx context.Context, id []byte) (user models.User, er
 		return models.User{}, utils.ErrWrap(op, err)
 	}
 	return user, nil
+}
+
+func (a *AuthService) UpdateUser(ctx context.Context, user models.User) error {
+	const op = "authService.UpdateUser"
+
+	err := a.UserProvider.UpdateUser(ctx, user)
+	if err != nil {
+		if errors.Is(err, storage.ErrIsNotExist) {
+			return utils.ErrWrap(op, ErrUserIsNotExist)
+		}
+		return utils.ErrWrap(op, err)
+	}
+	return nil
 }
 
 func (a *AuthService) ParseToken(token string) ([]byte, error) {

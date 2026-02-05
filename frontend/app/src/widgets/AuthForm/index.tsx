@@ -2,6 +2,8 @@ import './index.css';
 import React, { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useUserStore } from '../../store/user';
+import OpenEye from '../../../assets/icons/open.svg';
+import HideEye from '../../../assets/icons/hide.svg';
 
 const AuthForm: React.FC = () => {
   const [shown, setShown] = useState(false);
@@ -17,43 +19,35 @@ const AuthForm: React.FC = () => {
     e.preventDefault();
     setError('');
 
-    let msg: string = ""
-    if (name.trim().length < 3) {
-      msg = 'Имя должно содержать минимум 3 символа';
-    }
-    else if (password.length < 8) {
-      msg = 'Пароль должен содержать минимум 8 символов';
-    }
-    else if (mode === 'register' && password !== confirmPassword) {
-      msg = 'Пароли не совпадают';
-    }
-    if (msg != "") {
-      setError(msg);
-      return;
-    }
+    let msg: string = "";
+    if (name.trim().length < 3) msg = 'Имя должно содержать минимум 3 символа';
+    else if (password.length < 8) msg = 'Пароль должен содержать минимум 8 символов';
+    else if (mode === 'register' && password !== confirmPassword) msg = 'Пароли не совпадают';
+
+    if (msg) return setError(msg);
 
     setLoading(true);
-
     try {
-      if (mode === 'login') {
-        await login(name, password);
-      } else {
-        await registration(name, password);
-      }
+      mode === 'login'
+        ? await login(name, password)
+        : await registration(name, password);
 
       setName('');
       setPassword('');
       setConfirmPassword('');
     } catch (err: any) {
-        const errorMessage = err?.response?.data?.message || 'Произошла ошибка';
-        setError(errorMessage);
+      let errorMessage = err?.response?.data?.message || 'Произошла ошибка';
+      if (errorMessage === "invalid credentails") {
+        errorMessage = "неверные имя или парол"
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   const switchMode = () => {
-    setMode(prev => (prev === 'login' ? 'register' : 'login'));
+    setMode(prev => prev === 'login' ? 'register' : 'login');
     setError('');
     setName('');
     setPassword('');
@@ -66,6 +60,7 @@ const AuthForm: React.FC = () => {
         <p className="auth-title">{mode === 'login' ? 'Войти' : 'Регистрация'}</p>
 
         <form onSubmit={handleSubmit}>
+          
           <section>
             <input
               placeholder='Имя'
@@ -77,7 +72,7 @@ const AuthForm: React.FC = () => {
             />
           </section>
 
-          <section>
+          <section className="password-wrapper">
             <input
               placeholder='Пароль'
               type={shown ? "text" : "password"}
@@ -86,10 +81,16 @@ const AuthForm: React.FC = () => {
               required
               disabled={loading}
             />
+            <img
+              src={shown ? HideEye : OpenEye}
+              alt="toggle visibility"
+              className="eye-icon"
+              onClick={() => !loading && setShown(!shown)}
+            />
           </section>
 
           {mode === 'register' && (
-            <section>
+            <section className="password-wrapper">
               <input
                 placeholder='Повторите пароль'
                 type={shown ? "text" : "password"}
@@ -98,11 +99,14 @@ const AuthForm: React.FC = () => {
                 required
                 disabled={loading}
               />
+              <img
+                src={shown ? HideEye : OpenEye}
+                alt="toggle visibility"
+                className="eye-icon"
+                onClick={() => !loading && setShown(!shown)}
+              />
             </section>
           )}
-          <button onClick={() => setShown(!shown)} className='b2' type='button'> 
-            {shown ? "Скрыть" : "Показать"} пароль
-          </button>
 
           {error && <div className="error-message">{error}</div>}
 
