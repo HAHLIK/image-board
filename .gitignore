@@ -1,1 +1,4 @@
 makefile
+.env
+.env.*
+!.env.example

@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const URL_API = `http://localhost/api`
-const AUTH_API = `http://localhost/auth`
+const URL = import.meta.env.VITE_URL
+const URL_API =  URL + `/api`
+const AUTH_API = URL + `/auth`
 
 export const $api = axios.create({
     withCredentials: true,
